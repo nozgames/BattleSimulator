@@ -1,0 +1,14 @@
+{
+    "name": "BattleSimulator.AI",
+    "rootNamespace": "BattleSimulator.AI",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
