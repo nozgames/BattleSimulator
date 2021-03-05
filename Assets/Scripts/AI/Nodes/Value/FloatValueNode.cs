@@ -9,7 +9,11 @@
             output = new FloatPort(this, PortFlow.Output);
         }
 
-        public sealed override void Execute(Context context) => output.Write(GetValue(context));
+        public sealed override bool Execute(Context context)
+        {
+            output.Write(GetValue(context));
+            return true;
+        }
 
         protected abstract float GetValue(Context context);
     }

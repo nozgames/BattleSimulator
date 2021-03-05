@@ -24,5 +24,9 @@ namespace BattleSimulator.AI
             this.from = from;
             this.to = to;
         }
+
+        public float ReadFloat(Context context) => from.ReadFloat(context);
+
+        public bool ReadBoolean (Context context) => from.ReadBoolean(context);
     }
 }

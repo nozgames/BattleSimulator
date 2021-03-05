@@ -2,6 +2,6 @@
 {
     public abstract class Node
     {
-        public abstract void Execute(Context context);
+        public abstract bool Execute(Context context);
     }
 }

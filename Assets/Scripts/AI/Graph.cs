@@ -1,19 +1,48 @@
-﻿namespace BattleSimulator.AI
+﻿using System.Collections.Generic;
+
+namespace BattleSimulator.AI
 {
     public class Graph
     {
-        private Node[] _nodes;
+        private List<Node> _nodes = new List<Node>();
 
         // TODO: This could be build from the node list afer loading a graph
-        private ActionNode[] _actions; 
+        private List<ActionNode> _actions = new List<ActionNode>(); 
 
         // TODO: what parameters
         public void Execute (Context context)
-        {
+        {            
             foreach(var action in _actions)
             {
                 action.Execute(context);
             }
+
+            var bestPriority = Priority.none;
+            var bestAction = (ActionNode)null;
+            foreach(var action in _actions)
+            {
+                if(action.priorityPort.value > bestPriority)
+                {
+                    bestAction = action;
+                    bestPriority = action.priorityPort.value;
+                }
+            }
+
+            if(bestAction != null)
+            {
+                // TODO: perform the action somehow..  Probably attach some data to the action that 
+                //       the caller can use to determine what action to perform.  Also need to trigger the cooldown as well.
+
+                bestAction.Perform();
+            }
+        }
+
+        public void AddNode (Node node)
+        {
+            _nodes.Add(node);
+
+            if (node is ActionNode actionNode)
+                _actions.Add(actionNode);
         }
 
         /* TODO

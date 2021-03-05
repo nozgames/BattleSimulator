@@ -9,7 +9,7 @@
             _value = value;
         }
 
-        public void Write(float value) => _value = value;
+        public void Write(float value) => _value = value;               
 
         protected override float ReadFloat () => _value;
 

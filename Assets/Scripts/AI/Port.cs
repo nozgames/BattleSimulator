@@ -98,6 +98,14 @@ namespace BattleSimulator.AI
             node.Execute(context);
         }
 
+        public Priority ReadPriority (Context context)
+        {
+            Execute(context);
+
+            // Now ask the port to return its value as a float
+            return ReadPriority();
+        }
+
         public float ReadFloat (Context context)
         {
             Execute(context);
@@ -123,5 +131,6 @@ namespace BattleSimulator.AI
         protected virtual float ReadFloat () => 0.0f;
         protected virtual bool ReadBoolean() => false;
         protected virtual Target ReadTarget() => null;
+        protected virtual Priority ReadPriority() => new Priority { value = 0.0f, weight = 0.0f };
     }
 }

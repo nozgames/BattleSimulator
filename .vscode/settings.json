@@ -1,0 +1,24 @@
+{
+    "files.exclude": {
+        "**/*.meta": true,
+        "**/*.csproj": true,
+        "**/*.sln": true,
+        "**/.vsconfig": true,
+        "**/*.asset": true,
+        "Assets/Materials": true,
+        "Assets/Meshes": true,
+        "Assets/Scenes": true,
+        "Assets/Settings": true,
+        "Assets/Textures": true,
+        "Assets/Prefabs": true,
+        ".vs" : true,
+        "obj" :true,
+        "Library" : true,
+        "Packages" : true,
+        "SourceAssets" : true,
+        "Temp" : true,
+        "ProjectSettings" : true,
+        "UserSettings" : true,
+        "Logs" : true,
+    }
+}
