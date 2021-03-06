@@ -12,6 +12,8 @@ namespace BattleSimulator.UI
         [SerializeField] private RectTransform _inputsTransform = null;
         [SerializeField] private RectTransform _outputsTransform = null;
 
+        private RectTransform _rect;
+
         public UIPort[] ports { get; private set; }
         public NodeInfo nodeInfo { get; private set; }
         public Node node { get; private set; }
@@ -40,6 +42,20 @@ namespace BattleSimulator.UI
                     port.flow == PortFlow.Input ? uinode._inputsTransform : uinode._outputsTransform)).ToArray();
 
             return uinode;
+        }
+
+        private void Awake()
+        {
+            _rect = GetComponent<RectTransform>();
+        }
+
+        public void MoveTo (Vector2 position)
+        {
+            _rect.anchoredPosition = position;
+
+            foreach(var port in ports)
+                foreach (var wire in port.wires)
+                    wire.UpdateRenderer();
         }
     }
 }

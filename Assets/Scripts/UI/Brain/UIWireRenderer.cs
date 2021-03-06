@@ -54,11 +54,17 @@ namespace BattleSimulator.UI
         {
             _line = GetComponent<UILineRenderer>();
             _rect = GetComponent<RectTransform>();
+            _line.enabled = false;
         }
 
         private void OnEnable()
         {
             UpdateLine();
+        }
+
+        private void OnDisable()
+        {
+            _line.enabled = false;
         }
 
         private void UpdateLine()
@@ -82,11 +88,12 @@ namespace BattleSimulator.UI
 
             if (from == to)
             {
+                _line.enabled = false;
                 _line.Points = new Vector2[] { };
-                
                 return;
             }
 
+            _line.enabled = true;
             _line.color = _fromColor;
 
             var stem = (_to - _from).magnitude * _stemLength;

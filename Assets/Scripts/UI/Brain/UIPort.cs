@@ -30,5 +30,19 @@ namespace BattleSimulator.UI
 
             return uiport;
         }
+
+        public bool CanConnectTo(UIPort uiport)
+        {
+            if (uiport == null || uiport == this)
+                return false;
+
+            if (uiport.port.node == port.node)
+                return false;
+
+            if (uiport.port.flow == port.flow)
+                return false;
+
+            return true;
+        }
     }
 }

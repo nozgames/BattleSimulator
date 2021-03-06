@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI.Extensions;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using BattleSimulator.UI;
 using BattleSimulator.AI;
-using System.Linq;
 
 namespace BattleSimulator
 {
@@ -24,11 +20,13 @@ namespace BattleSimulator
         [SerializeField] private RectTransform _zoomTransform = null;
         [SerializeField] private UIGrid _grid = null;
         [SerializeField] private RectTransform _nodeTransform = null;
+        [SerializeField] private RectTransform _wires = null;
         [SerializeField] private UIWireRenderer _dragWire = null;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _nodePrefab = null;
         [SerializeField] private GameObject _compressedNodePrefab = null;
+        [SerializeField] private GameObject _wirePrefab = null;
 
         private int _zoomLevel = 10;
         private Drag _drag = Drag.None;
@@ -56,6 +54,7 @@ namespace BattleSimulator
             zoomLevel = 10;
 
             CreateNode(new AI.FloatToPriority(), Vector2.zero);
+            CreateNode(new AI.DistanceNode(), Vector2.zero);
         }
 
         public void OnScroll(PointerEventData eventData)
@@ -129,6 +128,27 @@ namespace BattleSimulator
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            switch (_drag)
+            {
+                case Drag.Port:
+                {
+                    var targetPort = GetHoverComponent<UIPort>(eventData);
+                    if (_dragPort.CanConnectTo(targetPort))
+                    {
+                        var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
+                        var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
+                        UIWire.Create(
+                            new Wire(from.port, to.port),
+                            _wirePrefab,
+                            _wires,
+                            from,
+                            to);
+                    }
+
+                    break;
+                }
+            }
+
             _dragWire.gameObject.SetActive(false);
         }
 
@@ -140,7 +160,7 @@ namespace BattleSimulator
                     if (eventData.button != PointerEventData.InputButton.Left)
                         return;
 
-                    _dragNode.gameObject.GetComponent<RectTransform>().anchoredPosition = _dragAnchorStart + (eventData.position - _dragStart);
+                    _dragNode.MoveTo(_dragAnchorStart + (eventData.position - _dragStart));                    
                     break;
 
                 case Drag.Port:
@@ -153,6 +173,19 @@ namespace BattleSimulator
                         _dragWire.from = _dragAnchorStart + (position - _dragStart);
                     else
                         _dragWire.to = _dragAnchorStart + (position - _dragStart);
+
+                    // Snap to valid ports
+                    // TODO: change cursor when port is invalid like blueprint does
+                    var snapPort = GetHoverComponent<UIPort>(eventData);
+                    if(_dragPort.CanConnectTo(snapPort))
+                    {
+                        var snapPortCenter = RectTransformUtility.CalculateRelativeRectTransformBounds(_zoomTransform, snapPort.connection.GetComponent<RectTransform>()).center;
+                        if (snapPort.port.flow == PortFlow.Input)
+                            _dragWire.to = snapPortCenter;
+                        else
+                            _dragWire.from = snapPortCenter;
+                    }
+
                     break;
 
                 case Drag.Graph:
