@@ -9,7 +9,7 @@ namespace BattleSimulator.AI
     public enum NodeFlags
     {
         None = 0,
-        Compressed = 1,
+        Compact = 1,
         Hidden = 2
     }
 

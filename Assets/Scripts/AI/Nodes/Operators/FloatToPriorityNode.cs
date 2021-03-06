@@ -7,32 +7,32 @@ namespace BattleSimulator.AI
     /// </summary>
     public class FloatToPriority : Node
     {
-        public FloatPort input { get; private set; }
-        public FloatPort min { get; private set; }
-        public FloatPort max { get; private set; }
-        public FloatPort weight { get; private set; }
-        public PriorityPort output { get; private set; }
+        public FloatInputPort inputPort { get; private set; }
+        public FloatInputPort minPort { get; private set; }
+        public FloatInputPort maxPort { get; private set; }
+        public FloatInputPort weightPort { get; private set; }
+        public PriorityOutputPort outputPort { get; private set; }
 
         public FloatToPriority()
         {
-            input = new FloatPort(this, PortFlow.Input);
-            min = new FloatPort(this, PortFlow.Input);
-            max = new FloatPort(this, PortFlow.Input);
-            weight = new FloatPort(this, PortFlow.Input);
-            output = new PriorityPort(this, PortFlow.Output);
+            inputPort = new FloatInputPort(this);
+            minPort = new FloatInputPort(this);
+            maxPort = new FloatInputPort(this);
+            weightPort = new FloatInputPort(this);
+            outputPort = new PriorityOutputPort(this);
         }
 
         public override bool Execute(Context context)
         {
-            var value = this.input.ReadFloat(context);
-            var min = this.min.ReadFloat(context);
-            var max = this.max.ReadFloat(context);
-            var weight = this.weight.ReadFloat(context);
+            var value = inputPort.Read(context);
+            var min = minPort.Read(context);
+            var max = maxPort.Read(context);
+            var weight = weightPort.Read(context);
 
-            output.Write(new Priority {
+            outputPort.value = new Priority {
                 weight = weight,
                 value = Mathf.Clamp((value - min) / (max - min), 0, 1)
-            });
+            };
 
             return true;
         }

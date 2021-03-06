@@ -7,5 +7,6 @@ namespace BattleSimulator.AI
         public float health;
         public float maxHealth;
         public Vector3 position;
+        public int team;
     }
 }

@@ -21,10 +21,12 @@ namespace BattleSimulator.AI
             var bestAction = (ActionNode)null;
             foreach(var action in _actions)
             {
-                if(action.priorityPort.value > bestPriority)
+                action.Execute(context);
+
+                if(action.priority > bestPriority)
                 {
                     bestAction = action;
-                    bestPriority = action.priorityPort.value;
+                    bestPriority = action.priority;
                 }
             }
 

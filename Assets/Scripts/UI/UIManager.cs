@@ -20,16 +20,16 @@ namespace BattleSimulator.UI
         {
             var type = port?.GetType();
 
-            if (type == typeof(FloatPort))
+            if (type == typeof(FloatInputPort) || type == typeof(FloatOutputPort))
                 return instance._floatPortColor;
 
-            if (type == typeof(BooleanPort))
+            if (type == typeof(BooleanInputPort) || type == typeof(BooleanOutputPort))
                 return instance._booleanPortColor;
 
-            if (type == typeof(TargetPort))
+            if (type == typeof(UnitInputPort) || type == typeof(UnitOutputPort))
                 return instance._unitPortColor;
 
-            if (type == typeof(PriorityPort))
+            if (type == typeof(PriorityInputPort) || type == typeof(PriorityOutputPort))
                 return instance._priorityPortColor;
 
             //if (type == typeof(ActionPort))

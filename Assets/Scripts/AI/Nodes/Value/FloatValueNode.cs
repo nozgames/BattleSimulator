@@ -2,16 +2,16 @@
 {
     public abstract class FloatValueNode : ValueNode
     {
-        public FloatPort output { get; private set; }
+        public FloatOutputPort output { get; private set; }
 
         public FloatValueNode()
         {
-            output = new FloatPort(this, PortFlow.Output);
+            output = new FloatOutputPort(this);
         }
 
         public sealed override bool Execute(Context context)
         {
-            output.Write(GetValue(context));
+            output.value = GetValue(context);
             return true;
         }
 

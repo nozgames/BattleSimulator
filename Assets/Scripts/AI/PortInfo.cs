@@ -46,6 +46,12 @@ namespace BattleSimulator.AI
                 portInfo.name = !string.IsNullOrEmpty(attr.name) ? attr.name : portInfo.name;
             }
 
+            if (portInfo.name.EndsWith("port", StringComparison.OrdinalIgnoreCase))
+                portInfo.name = portInfo.name.Substring(0, portInfo.name.Length - 4);
+
+            if (!char.IsUpper(portInfo.name[0]))                
+                portInfo.name = $"{char.ToUpper(portInfo.name[0])}{portInfo.name.Substring(1)}";
+
             return portInfo;
         }
     }

@@ -1,13 +1,25 @@
-﻿namespace BattleSimulator.AI
+﻿using UnityEngine;
+
+namespace BattleSimulator.AI
 {
     public struct Priority
     {
         public static readonly Priority none = new Priority { value = 0.0f, weight = 0.0f };
 
-        public float value;
+        private float _value;
+
+        public float value {
+            get => _value;
+            set {
+                _value = Mathf.Clamp(value, 0, 1);
+            }
+        }
+
+        public float weightedValue => weight * _value;
+
         public float weight;
 
-        public static bool operator >(Priority lhs, Priority rhs) => lhs.value > rhs.value;
-        public static bool operator <(Priority lhs, Priority rhs) => lhs.value < rhs.value;
+        public static bool operator >(Priority lhs, Priority rhs) => lhs.weightedValue > rhs.weightedValue;
+        public static bool operator <(Priority lhs, Priority rhs) => lhs.weightedValue < rhs.weightedValue;
     }
 }

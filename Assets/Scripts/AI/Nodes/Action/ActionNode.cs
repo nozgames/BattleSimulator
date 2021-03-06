@@ -2,12 +2,12 @@
 
 namespace BattleSimulator.AI
 {
-    [Node(flags = NodeFlags.Hidden)]
+    //[Node(flags = NodeFlags.Hidden)]
     public class ActionNode : Node
     {
         // TODO: just give action name rather than having it be the real action, do that elsewhere.
 
-        public PriorityPort priorityPort { get; private set; }
+        public PriorityInputPort priorityPort { get; private set; }
 
         public string name { get; private set; }
         
@@ -21,6 +21,8 @@ namespace BattleSimulator.AI
         /// </summary>
         public float cooldownRemaining { get; set; }
 
+        public Priority priority { get; protected set; }
+
         /// <summary>
         /// True if the action can be performed
         /// </summary>
@@ -28,7 +30,7 @@ namespace BattleSimulator.AI
 
         public ActionNode()
         {
-            priorityPort = new PriorityPort (this, PortFlow.Input);
+            priorityPort = new PriorityInputPort (this);
         }
 
         public override bool Execute(Context context)
@@ -36,11 +38,11 @@ namespace BattleSimulator.AI
             // If the action cannot be performed then give it no priority
             if(!canPerform)
             {
-                priorityPort.Write(Priority.none);
+                priority = Priority.none;
                 return false;
             }
 
-            priorityPort.ReadPriority(context);
+            priority = priorityPort.Read(context);
 
             return true;
         }

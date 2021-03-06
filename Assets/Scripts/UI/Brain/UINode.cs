@@ -31,7 +31,7 @@ namespace BattleSimulator.UI
                 return null;
 
             UINode uinode = null;
-            if (nodeInfo.flags.HasFlag(NodeFlags.Compressed))
+            if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 uinode = Instantiate(prefab, parent).GetComponent<UINode>();
             else
                 uinode = Instantiate(prefab, parent).GetComponent<UINode>();

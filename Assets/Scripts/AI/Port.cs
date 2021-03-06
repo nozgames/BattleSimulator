@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace BattleSimulator.AI
@@ -16,7 +15,7 @@ namespace BattleSimulator.AI
 
         public Node node { get; private set; }
 
-        public PortFlow flow { get; private set; }
+        public PortFlow flow { get; private set; }        
 
         /// <summary>
         /// Construct the port with the node that the port belongs to
@@ -83,54 +82,26 @@ namespace BattleSimulator.AI
 
             // Add a new wire to both ports
             var wire = (flow == PortFlow.Output ?
-                new Wire(this, port) :
-                new Wire(port, this));
+                new Wire(this as OutputPort, port as InputPort) :
+                new Wire(port as OutputPort, this as InputPort));
 
             _wires.Add(wire);
             port._wires.Add(wire);
         }
 
-
         private void Execute (Context context)
         {
-            // Execute the node first which should set the value in the port
-            // TODO: need way to prevent unnecessary execution of nodes (compiler maybe)
-            node.Execute(context);
+            if(flow == PortFlow.Input)
+            {
+                foreach (var wire in _wires)
+                    wire.from.Execute(context);                
+            }
+            else
+            {
+                // Execute the node first which should set the value in the port
+                // TODO: need way to prevent unnecessary execution of nodes (compiler maybe)
+                node.Execute(context);
+            }
         }
-
-        public Priority ReadPriority (Context context)
-        {
-            Execute(context);
-
-            // Now ask the port to return its value as a float
-            return ReadPriority();
-        }
-
-        public float ReadFloat (Context context)
-        {
-            Execute(context);
-
-            // Now ask the port to return its value as a float
-            return ReadFloat();
-        }
-
-        public bool ReadBoolean (Context context)
-        {
-            Execute(context);
-
-            return ReadBoolean();
-        }
-
-        public Target ReadTarget (Context context)
-        {
-            Execute(context);
-
-            return ReadTarget();
-        }
-
-        protected virtual float ReadFloat () => 0.0f;
-        protected virtual bool ReadBoolean() => false;
-        protected virtual Target ReadTarget() => null;
-        protected virtual Priority ReadPriority() => new Priority { value = 0.0f, weight = 0.0f };
     }
 }

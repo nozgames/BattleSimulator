@@ -4,10 +4,10 @@ namespace BattleSimulator.AI
 {
     public class Wire
     {
-        public Port from;
-        public Port to;
+        public OutputPort from;
+        public InputPort to;
 
-        public Wire (Port from, Port to)
+        public Wire (OutputPort from, InputPort to)
         {
             if (from == null)
                 throw new ArgumentNullException("from");
@@ -25,8 +25,12 @@ namespace BattleSimulator.AI
             this.to = to;
         }
 
-        public float ReadFloat(Context context) => from.ReadFloat(context);
+        public float ReadFloat() => from.ReadFloat();
 
-        public bool ReadBoolean (Context context) => from.ReadBoolean(context);
+        public bool ReadBoolean () => from.ReadBoolean();
+
+        public Priority ReadPriority() => from.ReadPriority();
+
+        public Target ReadUnit() => from.ReadUnit();
     }
 }

@@ -56,9 +56,6 @@ namespace BattleSimulator
         private void Start()
         {
             zoomLevel = 10;
-
-            CreateNode(new AI.FloatToPriority(), Vector2.zero);
-            CreateNode(new AI.DistanceNode(), Vector2.zero);
         }
 
         public void OnScroll(PointerEventData eventData)
@@ -111,7 +108,7 @@ namespace BattleSimulator
                         var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
                         var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
                         UIWire.Create(
-                            new Wire(from.port, to.port),
+                            new Wire((OutputPort)from.port, (InputPort)to.port),
                             _wirePrefab,
                             _wires,
                             from,
@@ -223,8 +220,8 @@ namespace BattleSimulator
                 case Drag.Graph:
                     if (eventData.button != PointerEventData.InputButton.Right)
                         return;
-                    
-                    _zoomTransform.anchoredPosition = _dragAnchorStart + (eventData.position - _dragStart);
+
+                    _dragNodes.anchoredPosition = _zoomTransform.anchoredPosition = _dragAnchorStart + (eventData.position - _dragStart);                    
                     _grid.GridOffset = _zoomTransform.anchoredPosition;
                     break;
             }
@@ -237,7 +234,7 @@ namespace BattleSimulator
                 return null;
 
             GameObject prefab = null;
-            if (nodeInfo.flags.HasFlag(NodeFlags.Compressed))
+            if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 prefab = _compressedNodePrefab;
             else
                 prefab = _nodePrefab;
