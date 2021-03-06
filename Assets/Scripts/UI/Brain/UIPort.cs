@@ -16,6 +16,8 @@ namespace BattleSimulator.UI
         public Port port { get; private set; }
         public PortInfo portInfo { get; private set; }
 
+        public RectTransform connection => _icon.GetComponent<RectTransform>();
+
         public static UIPort Create (PortInfo portInfo, UINode uinode, GameObject prefab, RectTransform parent)
         {
             var uiport = Instantiate(prefab, parent).GetComponent<UIPort>();
