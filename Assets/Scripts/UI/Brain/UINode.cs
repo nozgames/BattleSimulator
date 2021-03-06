@@ -15,16 +15,18 @@ namespace BattleSimulator.UI
 
         private RectTransform _rect;
 
+        public UIGraph uigraph { get; private set; }
         public UIPort[] ports { get; private set; }
         public NodeInfo nodeInfo { get; private set; }
         public Node node { get; private set; }
+        public Vector2 position => _rect.anchoredPosition;
 
         public bool selected {
             get => _selected.activeSelf;
             set => _selected.SetActive(value);
         }
 
-        public static UINode Create (Node node, GameObject prefab, RectTransform parent, Vector2 position)
+        public static UINode Create (UIGraph uigraph, Node node, GameObject prefab, RectTransform parent, Vector2 position)
         {
             var nodeInfo = NodeInfo.Create(node);
             if (null == nodeInfo)
@@ -36,6 +38,7 @@ namespace BattleSimulator.UI
             else
                 uinode = Instantiate(prefab, parent).GetComponent<UINode>();
 
+            uinode.uigraph = uigraph;
             uinode.GetComponent<RectTransform>().anchoredPosition = position;
             uinode._name.text = nodeInfo.name;
             uinode.nodeInfo = nodeInfo;

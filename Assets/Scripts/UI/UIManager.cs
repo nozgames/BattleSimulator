@@ -9,6 +9,12 @@ namespace BattleSimulator.UI
     {
         public static UIManager instance { get; private set; }
 
+        [Header("General")]
+        [SerializeField] private RectTransform _graphs = null;
+
+        [Header("Prefabs")]
+        [SerializeField] private GameObject _graphPrefab = null;
+
         [Header("Colors")]
         [SerializeField] private Color _floatPortColor = Color.white;
         [SerializeField] private Color _priorityPortColor = Color.white;
@@ -36,6 +42,11 @@ namespace BattleSimulator.UI
             //    return instance._actionPortColor;
 
             return Color.gray;
+        }
+
+        public static void NewGraph ()
+        {
+            UIGraph.Create(new AI.Graph(), instance._graphPrefab, instance._graphs);
         }
 
         private void Awake()

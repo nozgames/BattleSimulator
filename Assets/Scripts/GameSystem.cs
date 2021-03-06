@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 using BattleSimulator.AI;
+using BattleSimulator.UI;
 
 namespace BattleSimulator
 {
@@ -36,6 +37,8 @@ namespace BattleSimulator
             // TODO: contexts can be reused or be a struct
             graph.Execute(context);
 #endif            
+
+            UIManager.NewGraph();
         }
 
         private void Update()

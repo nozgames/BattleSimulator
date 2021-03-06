@@ -25,6 +25,7 @@ namespace BattleSimulator
         [SerializeField] private RectTransform _wires = null;
         [SerializeField] private RectTransform _dragNodes = null;
         [SerializeField] private UIWireRenderer _dragWire = null;
+        [SerializeField] private RectTransform _trash = null;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _nodePrefab = null;
@@ -38,9 +39,15 @@ namespace BattleSimulator
         private UINode _dragNode = null;
         private Vector2 _dragStart;
         private Vector2 _dragAnchorStart;
-        
+        private Stack<Command> _undo = new Stack<Command>();
+        private Stack<Command> _redo = new Stack<Command>();
+        private Graph _graph;
 
         private List<UINode> _nodes = new List<UINode>();
+
+        public AI.Graph graph => _graph;
+
+        public RectTransform trash => _trash;
 
         private int zoomLevel 
         {
@@ -51,6 +58,22 @@ namespace BattleSimulator
                 _grid.GridScale = _zoomTransform.localScale.x;
                 _grid.color = new Color(_grid.color.r, _grid.color.g, _grid.color.b, (_zoomLevel / 25.0f) * 0.6f);
             }
+        }
+
+        public static UIGraph Create (AI.Graph graph, GameObject prefab, RectTransform parent)
+        {
+            var uigraph = Instantiate(prefab, parent).GetComponent<UIGraph>();
+            uigraph._graph = graph;
+            return uigraph;
+        }
+
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Z) && Input.GetKey(KeyCode.LeftControl))
+                Undo();
+
+            if (Input.GetKeyDown(KeyCode.Y) && Input.GetKey(KeyCode.LeftControl))
+                Redo();
         }
 
         private void Start()
@@ -118,6 +141,12 @@ namespace BattleSimulator
                     break;
                 }
 
+                case Drag.Node:
+                {
+                    
+                    break;
+                }
+
                 case Drag.None:
                     if (_dragNode != null && !Input.GetKey(KeyCode.LeftShift))
                         SelectNode(_dragNode);
@@ -153,6 +182,7 @@ namespace BattleSimulator
                 {
                     _dragAnchorStart = _dragNode.GetComponent<RectTransform>().anchoredPosition;
                     _drag = Drag.Node;
+                    MoveNodes(eventData, false);
                     return;
                 }
             }
@@ -170,6 +200,22 @@ namespace BattleSimulator
             
         }
 
+        private void MoveNodes (PointerEventData eventData, bool merge = false)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position - eventData.delta, eventData.pressEventCamera, out var pt0);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position, eventData.pressEventCamera, out var pt1);
+            var delta = pt1 - pt0;
+
+            if (_dragNode.selected)
+            {
+                var group = new GroupCommand();
+                foreach (var selected in _selected)
+                    group.Add(new MoveNodeCommand(selected, selected.position + delta));
+                Execute(group, merge);
+            } else
+                Execute(new MoveNodeCommand(_dragNode, _dragNode.position + delta), merge);
+        }
+
         public void OnDrag(PointerEventData eventData)
         {
             switch (_drag)
@@ -178,18 +224,7 @@ namespace BattleSimulator
                     if (eventData.button != PointerEventData.InputButton.Left)
                         return;
 
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position - eventData.delta, eventData.pressEventCamera, out var pt0);
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position, eventData.pressEventCamera, out var pt1);
-                    var delta = pt1 - pt0;
-
-                    if (_dragNode.selected)
-                    {
-                        foreach (var selected in _selected)
-                            selected.Move(delta);
-                    }
-                    else
-                        _dragNode.MoveTo(delta);
-                    
+                    MoveNodes(eventData, true);
                     break;
 
                 case Drag.Port:
@@ -239,9 +274,56 @@ namespace BattleSimulator
             else
                 prefab = _nodePrefab;
 
-            var uinode = UINode.Create(node, prefab, parent == null ? _nodeTransform : parent, position);
-            _nodes.Add(uinode);
-            return uinode;
+            return UINode.Create(this, node, prefab, parent == null ? _nodeTransform : parent, position);
+        }
+
+        private void Execute (Command command, bool merge = true)
+        {
+            if(merge && _undo.Count > 0 && command.CanMerge(_undo.Peek()))
+            { 
+                _undo.Peek().Merge(command);
+                return;
+            }
+
+            _undo.Push(command);
+
+            // Clear the redo buffer.
+            foreach (var redo in _redo)
+                redo.Dispose();
+            _redo.Clear();
+
+            if(!command.isExecuted)
+                command.OnExecute();
+
+            command.selection = _selected.ToArray();
+        }
+
+        private void Undo ()
+        {
+            if (_undo.Count == 0)
+                return;
+
+            var command = _undo.Pop();
+            _redo.Push(command);
+            command.OnUndo();
+
+            UnselectAllNodes();
+            foreach (var selected in command.selection)
+                SelectNode(selected, true);
+        }
+
+        private void Redo()
+        {
+            if (_redo.Count == 0)
+                return;
+
+            var command = _redo.Pop();
+            _undo.Push(command);
+            command.OnRedo();
+
+            UnselectAllNodes();
+            foreach (var selected in command.selection)
+                SelectNode(selected, true);
         }
 
         public void BeginDrag (AI.NodeInfo nodeInfo, PointerEventData eventData)
@@ -260,8 +342,9 @@ namespace BattleSimulator
         {
             if (_drag != Drag.CreateNode)
                 return;
-
+            
             _dragNode.transform.SetParent(_nodeTransform);
+            Execute(new AddNodeCommand(this, _dragNode, _dragNode.position));
         }
 
         public void ContinueDrag(AI.NodeInfo nodeInfo, PointerEventData eventData)
@@ -295,6 +378,6 @@ namespace BattleSimulator
         {
             while (_selected.Count > 0)
                 UnselectNode(_selected[0]);
-        }
+        }        
     }
 }

@@ -39,12 +39,31 @@ namespace BattleSimulator.AI
             }
         }
 
+        /// <summary>
+        /// Add a node to the graph
+        /// </summary>
+        /// <param name="node">Node to add</param>
         public void AddNode (Node node)
         {
+            if (_nodes.Contains(node))
+                return;
+
             _nodes.Add(node);
 
             if (node is ActionNode actionNode)
                 _actions.Add(actionNode);
+        }
+
+        /// <summary>
+        /// Remove a node from the graph
+        /// </summary>
+        /// <param name="node">Node to remove</param>
+        public void RemoveNode (Node node)
+        {
+            _nodes.Remove(node);
+
+            if (node is ActionNode actionNode)
+                _actions.Remove(actionNode);
         }
 
         /* TODO

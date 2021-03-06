@@ -106,6 +106,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9210461244125357967}
   - component: {fileID: 8158977529864410487}
+  - component: {fileID: 1139129684064365897}
   - component: {fileID: 4307457486827541867}
   m_Layer: 5
   m_Name: Name
@@ -141,6 +142,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4678146912201806132}
   m_CullTransparentMesh: 1
+--- !u!114 &1139129684064365897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4678146912201806132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: 1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!114 &4307457486827541867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,15 +209,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
+  m_fontSize: 22
   m_fontSizeBase: 18
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 12
+  m_fontSizeMax: 22
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 4096
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -319,8 +340,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
+  m_MinWidth: 32
+  m_MinHeight: 32
   m_PreferredWidth: 32
   m_PreferredHeight: 32
   m_FlexibleWidth: -1
@@ -339,6 +360,7 @@ GameObject:
   - component: {fileID: 7912777474272789564}
   - component: {fileID: 2722172431197345574}
   - component: {fileID: 9070859115118215260}
+  - component: {fileID: 8197808965915047374}
   m_Layer: 5
   m_Name: UINodePaletteItem
   m_TagString: Untagged
@@ -383,8 +405,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 8
     m_Right: 8
-    m_Top: 8
-    m_Bottom: 8
+    m_Top: 4
+    m_Bottom: 4
   m_ChildAlignment: 3
   m_Spacing: 8
   m_ChildForceExpandWidth: 0
@@ -441,3 +463,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5926443827760941624}
   m_CullTransparentMesh: 1
+--- !u!114 &8197808965915047374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5926443827760941624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 48
+  m_PreferredWidth: -1
+  m_PreferredHeight: 48
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
