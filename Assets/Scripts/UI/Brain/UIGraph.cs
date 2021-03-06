@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using BattleSimulator.UI;
 using BattleSimulator.AI;
+using System;
 
 namespace BattleSimulator
 {
@@ -13,7 +14,8 @@ namespace BattleSimulator
             None,
             Graph,
             Port,
-            Node
+            Node,
+            CreateNode
         }
 
         [Header("General")]
@@ -21,6 +23,7 @@ namespace BattleSimulator
         [SerializeField] private UIGrid _grid = null;
         [SerializeField] private RectTransform _nodeTransform = null;
         [SerializeField] private RectTransform _wires = null;
+        [SerializeField] private RectTransform _dragNodes = null;
         [SerializeField] private UIWireRenderer _dragWire = null;
 
         [Header("Prefabs")]
@@ -28,6 +31,7 @@ namespace BattleSimulator
         [SerializeField] private GameObject _compressedNodePrefab = null;
         [SerializeField] private GameObject _wirePrefab = null;
 
+        private List<UINode> _selected = new List<UINode>();
         private int _zoomLevel = 10;
         private Drag _drag = Drag.None;
         private UIPort _dragPort = null;
@@ -84,11 +88,49 @@ namespace BattleSimulator
             _drag = Drag.None;            
 
             if (null == _dragPort)
-                _dragNode = GetHoverComponent<UINode>(eventData);            
+                _dragNode = GetHoverComponent<UINode>(eventData);
+
+            // Make sure the node that is clicked on is selected, but dont clear the other selection 
+            // until we know there is no drag operation going on
+            if (_drag == Drag.None && eventData.button == PointerEventData.InputButton.Left)
+                if (_dragPort != null)
+                    SelectNode(_dragPort.node);
+                else if (_dragNode != null && !_dragNode.selected)
+                    SelectNode(_dragNode, Input.GetKey(KeyCode.LeftShift));
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            switch (_drag)
+            {
+                case Drag.Port:
+                {
+                    var targetPort = GetHoverComponent<UIPort>(eventData);
+                    if (_dragPort.CanConnectTo(targetPort))
+                    {
+                        var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
+                        var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
+                        UIWire.Create(
+                            new Wire(from.port, to.port),
+                            _wirePrefab,
+                            _wires,
+                            from,
+                            to);
+                    }
+
+                    break;
+                }
+
+                case Drag.None:
+                    if (_dragNode != null && !Input.GetKey(KeyCode.LeftShift))
+                        SelectNode(_dragNode);
+                    break;
+            }
+
+            _dragWire.gameObject.SetActive(false);
+            _drag = Drag.None;
+            _dragPort = null;
+            _dragNode = null;
         }
 
         public void OnBeginDrag(PointerEventData eventData)
@@ -128,28 +170,7 @@ namespace BattleSimulator
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            switch (_drag)
-            {
-                case Drag.Port:
-                {
-                    var targetPort = GetHoverComponent<UIPort>(eventData);
-                    if (_dragPort.CanConnectTo(targetPort))
-                    {
-                        var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
-                        var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
-                        UIWire.Create(
-                            new Wire(from.port, to.port),
-                            _wirePrefab,
-                            _wires,
-                            from,
-                            to);
-                    }
-
-                    break;
-                }
-            }
-
-            _dragWire.gameObject.SetActive(false);
+            
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -160,7 +181,16 @@ namespace BattleSimulator
                     if (eventData.button != PointerEventData.InputButton.Left)
                         return;
 
-                    _dragNode.MoveTo(_dragAnchorStart + (eventData.position - _dragStart));                    
+                    if (_dragNode.selected)
+                    {
+                        foreach (var selected in _selected)
+                            selected.Move(eventData.delta);
+                    }
+                    else
+                    {
+                        _dragNode.MoveTo(_dragAnchorStart + (eventData.position - _dragStart));
+                    }
+                    
                     break;
 
                 case Drag.Port:
@@ -198,7 +228,7 @@ namespace BattleSimulator
             }
         }
 
-        public UINode CreateNode (Node node, Vector2 position)
+        public UINode CreateNode (Node node, Vector2 position, RectTransform parent = null)
         {
             var nodeInfo = NodeInfo.Create(node);
             if (null == nodeInfo)
@@ -210,9 +240,62 @@ namespace BattleSimulator
             else
                 prefab = _nodePrefab;
 
-            var uinode = UINode.Create(node, prefab, _nodeTransform, position);
+            var uinode = UINode.Create(node, prefab, parent == null ? _nodeTransform : parent, position);
             _nodes.Add(uinode);
             return uinode;
+        }
+
+        public void BeginDrag (AI.NodeInfo nodeInfo, PointerEventData eventData)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_zoomTransform, eventData.position, eventData.pressEventCamera, out var position);
+
+            var node = (AI.Node)Activator.CreateInstance(nodeInfo.nodeType);
+            _dragNode = CreateNode(node, position, _dragNodes);
+            _dragStart = position;
+            _dragAnchorStart = position;
+            _drag = Drag.CreateNode;
+            SelectNode(_dragNode);
+        }
+
+        public void EndDrag (AI.NodeInfo nodeInfo, PointerEventData eventData)
+        {
+            if (_drag != Drag.CreateNode)
+                return;
+
+            _dragNode.transform.SetParent(_nodeTransform);
+        }
+
+        public void ContinueDrag(AI.NodeInfo nodeInfo, PointerEventData eventData)
+        {
+            if (_drag != Drag.CreateNode)
+                return;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_zoomTransform, eventData.position, eventData.pressEventCamera, out var position);
+            _dragNode.MoveTo(position);
+        }
+
+        public void SelectNode (UINode node, bool add = false)
+        {
+            if (!add)
+                UnselectAllNodes();
+
+            if (_selected.Contains(node))
+                return;
+
+            node.selected = true;
+            _selected.Add(node);
+        }
+
+        public void UnselectNode(UINode node)
+        {
+            node.selected = false;
+            _selected.Remove(node);
+        }
+
+        public void UnselectAllNodes ()
+        {
+            while (_selected.Count > 0)
+                UnselectNode(_selected[0]);
         }
     }
 }

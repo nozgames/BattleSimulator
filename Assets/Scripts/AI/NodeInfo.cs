@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BattleSimulator.AI
 {
@@ -8,7 +9,8 @@ namespace BattleSimulator.AI
     public enum NodeFlags
     {
         None = 0,
-        Compressed = 1
+        Compressed = 1,
+        Hidden = 2
     }
 
     public class NodeAttribute : Attribute
@@ -53,13 +55,13 @@ namespace BattleSimulator.AI
             // Create a new node info
             nodeInfo = new NodeInfo();
             nodeInfo.nodeType = type;
-            nodeInfo.name = type.Name;
+            nodeInfo.name = type.Name;            
             _cache[type] = nodeInfo;
 
             var ports = new List<PortInfo>();
             for(; type != typeof(Node); type = type.BaseType)
             {
-                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
                 foreach(var property in properties)
                 {
                     if (!typeof(Port).IsAssignableFrom(property.PropertyType))
@@ -71,12 +73,15 @@ namespace BattleSimulator.AI
 
             nodeInfo.ports = ports.ToArray();
 
-            var attr = type.GetCustomAttribute<NodeAttribute>();
+            var attr = nodeInfo.nodeType.GetCustomAttribute<NodeAttribute>(true);
             if (null != attr)
             {
                 nodeInfo.flags = attr.flags;
                 nodeInfo.name = !string.IsNullOrEmpty(attr.name) ? attr.name : nodeInfo.name;
             }
+
+            if (nodeInfo.name.EndsWith("Node", StringComparison.OrdinalIgnoreCase))
+                nodeInfo.name = nodeInfo.name.Substring(0, nodeInfo.name.Length - 4);
 
             return nodeInfo;
         }

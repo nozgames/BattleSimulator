@@ -480,6 +480,7 @@ MonoBehaviour:
   _outputPrefab: {fileID: 4803700888649160734, guid: f532f08eeb88bdb42982ce3d35c34439, type: 3}
   _inputsTransform: {fileID: 1256781459244202093}
   _outputsTransform: {fileID: 1256781460055467680}
+  _selected: {fileID: 1417883490281711056}
 --- !u!114 &2175265745522443916
 MonoBehaviour:
   m_ObjectHideFlags: 0

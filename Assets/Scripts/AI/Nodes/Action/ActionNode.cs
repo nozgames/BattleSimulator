@@ -2,6 +2,7 @@
 
 namespace BattleSimulator.AI
 {
+    [Node(flags = NodeFlags.Hidden)]
     public class ActionNode : Node
     {
         // TODO: just give action name rather than having it be the real action, do that elsewhere.
@@ -25,10 +26,9 @@ namespace BattleSimulator.AI
         /// </summary>
         public bool canPerform => cooldownRemaining <= 0.0f;
 
-        public ActionNode(string name)
+        public ActionNode()
         {
             priorityPort = new PriorityPort (this, PortFlow.Input);
-            this.name = name;
         }
 
         public override bool Execute(Context context)

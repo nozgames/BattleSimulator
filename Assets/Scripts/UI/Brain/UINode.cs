@@ -11,12 +11,18 @@ namespace BattleSimulator.UI
         [SerializeField] private GameObject _outputPrefab = null;
         [SerializeField] private RectTransform _inputsTransform = null;
         [SerializeField] private RectTransform _outputsTransform = null;
+        [SerializeField] private GameObject _selected = null;
 
         private RectTransform _rect;
 
         public UIPort[] ports { get; private set; }
         public NodeInfo nodeInfo { get; private set; }
         public Node node { get; private set; }
+
+        public bool selected {
+            get => _selected.activeSelf;
+            set => _selected.SetActive(value);
+        }
 
         public static UINode Create (Node node, GameObject prefab, RectTransform parent, Vector2 position)
         {
@@ -57,5 +63,7 @@ namespace BattleSimulator.UI
                 foreach (var wire in port.wires)
                     wire.UpdateRenderer();
         }
+
+        public void Move(Vector2 position) => MoveTo(_rect.anchoredPosition += position);
     }
 }

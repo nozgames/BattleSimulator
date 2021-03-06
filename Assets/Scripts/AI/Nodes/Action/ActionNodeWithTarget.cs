@@ -2,11 +2,12 @@
 
 namespace BattleSimulator.AI
 {
+    [Node(flags = NodeFlags.Hidden)]
     public class ActionNodeWithTarget : ActionNode
     {
         public TargetPort targetPort { get; private set; }
 
-        public ActionNodeWithTarget (string name) : base(name)
+        public ActionNodeWithTarget ()
         {
             targetPort = new TargetPort(this, PortFlow.Input);
         }
