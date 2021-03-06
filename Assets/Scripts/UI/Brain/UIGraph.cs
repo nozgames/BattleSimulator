@@ -47,7 +47,7 @@ namespace BattleSimulator
             get => _zoomLevel;
             set {
                 _zoomLevel = Mathf.Clamp(value, 1, 25);
-                _zoomTransform.localScale = Vector3.one * Mathf.Pow(1.2f,zoomLevel-10);
+                _dragNodes.localScale = _zoomTransform.localScale = Vector3.one * Mathf.Pow(1.2f,zoomLevel-10);                
                 _grid.GridScale = _zoomTransform.localScale.x;
                 _grid.color = new Color(_grid.color.r, _grid.color.g, _grid.color.b, (_zoomLevel / 25.0f) * 0.6f);
             }
@@ -181,15 +181,17 @@ namespace BattleSimulator
                     if (eventData.button != PointerEventData.InputButton.Left)
                         return;
 
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position - eventData.delta, eventData.pressEventCamera, out var pt0);
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_dragNode.transform.parent, eventData.position, eventData.pressEventCamera, out var pt1);
+                    var delta = pt1 - pt0;
+
                     if (_dragNode.selected)
                     {
                         foreach (var selected in _selected)
-                            selected.Move(eventData.delta);
+                            selected.Move(delta);
                     }
                     else
-                    {
-                        _dragNode.MoveTo(_dragAnchorStart + (eventData.position - _dragStart));
-                    }
+                        _dragNode.MoveTo(delta);
                     
                     break;
 
