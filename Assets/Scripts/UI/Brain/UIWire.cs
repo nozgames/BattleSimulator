@@ -11,6 +11,7 @@ namespace BattleSimulator.UI
         private UIWireRenderer _renderer;
         private UIPort _from;
         private UIPort _to;
+        private bool _dirty = true;
 
         public Wire wire { get; private set; }
         
@@ -18,7 +19,7 @@ namespace BattleSimulator.UI
             get => _from;
             set {
                 _from = value;
-                UpdateRenderer();
+                _dirty = true;
             }
         }
 
@@ -26,7 +27,7 @@ namespace BattleSimulator.UI
             get => _to;
             set {
                 _to = value;
-                UpdateRenderer();
+                _dirty = true;
             }
         }
 
@@ -36,6 +37,7 @@ namespace BattleSimulator.UI
             uiwire.from = from;
             uiwire.to = to;
             uiwire.wire = wire;
+            uiwire._dirty = true;
 
             from.wires.Add(uiwire);
             to.wires.Add(uiwire);
@@ -51,22 +53,29 @@ namespace BattleSimulator.UI
 
         private void OnEnable()
         {
-            UpdateRenderer();
+            _dirty = true;
         }
 
-        public void UpdateRenderer()
+        private void LateUpdate()
         {
-            if (!isActiveAndEnabled)
-                return;
-
-            if(_from == null || _to == null)
+            if (_from == null || _to == null)
             {
                 _renderer.enabled = false;
                 return;
             }
 
-            _renderer.from = RectTransformUtility.CalculateRelativeRectTransformBounds(_rect.parent.parent, _from.connection).center;
-            _renderer.to = RectTransformUtility.CalculateRelativeRectTransformBounds(_rect.parent.parent, _to.connection).center;
+            var fromPosition = (Vector2)RectTransformUtility.CalculateRelativeRectTransformBounds(_rect.parent.parent, _from.connection).center;
+            var toPosition = (Vector2)RectTransformUtility.CalculateRelativeRectTransformBounds(_rect.parent.parent, _to.connection).center;
+
+            if (_dirty || fromPosition != _renderer.from || toPosition != _renderer.to)
+                UpdateRenderer(fromPosition, toPosition);
+        }
+
+        private void UpdateRenderer(Vector2 fromPosition, Vector2 toPosition)
+        {
+            _dirty = false;
+            _renderer.from = fromPosition;
+            _renderer.to = toPosition;
             _renderer.fromColor = UIManager.GetPortColor(_from.port);
             _renderer.toColor = UIManager.GetPortColor(_to.port);
             _renderer.enabled = true;

@@ -10,19 +10,19 @@ namespace BattleSimulator.AI
 
         internal bool Read(Context context, Func<List<Wire>, bool> combiner = null)
         {
-            if (_wires.Count == 0)
+            if (wires.Count == 0)
                 return false;
 
             Execute(context);
 
             if (null != combiner)
-                return combiner(_wires);
+                return combiner(wires);
 
-            if (_wires.Count == 1)
-                return _wires[0].ReadBoolean();
+            if (wires.Count == 1)
+                return wires[0].ReadBoolean();
 
             // Default handling of multiple wires is a logical AND
-            foreach (var wire in _wires)
+            foreach (var wire in wires)
                 if (!wire.ReadBoolean())
                     return false;
 

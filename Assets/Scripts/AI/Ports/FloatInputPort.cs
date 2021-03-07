@@ -12,21 +12,21 @@ namespace BattleSimulator.AI
 
         internal float Read(Context context, Func<List<Wire>, float> combiner = null)
         {
-            if (_wires.Count == 0)
+            if (wires.Count == 0)
                 return 0.0f;
 
             Execute(context);
 
             if (null != combiner)
-                return combiner(_wires);
+                return combiner(wires);
 
-            if (_wires.Count == 1)
-                return _wires[0].ReadFloat();
+            if (wires.Count == 1)
+                return wires[0].ReadFloat();
 
             // Default handling of multiple wires is to return the value with the greatest magnitude
             var value = 0.0f;
             var absvalue = 0.0f;
-            foreach (var wire in _wires)
+            foreach (var wire in wires)
             {
                 var wirevalue = wire.ReadFloat();
                 var wireabsvalue = Mathf.Abs(wirevalue);

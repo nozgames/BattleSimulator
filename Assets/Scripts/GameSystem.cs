@@ -2,6 +2,8 @@
 
 using BattleSimulator.AI;
 using BattleSimulator.UI;
+using System.IO;
+using System;
 
 namespace BattleSimulator
 {
@@ -38,8 +40,22 @@ namespace BattleSimulator
             graph.Execute(context);
 #endif            
 
-            UIManager.NewGraph();
+            try
+            {
+                _graph = UIManager.LoadGraph(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
+            } 
+            catch (Exception e)
+            {
+                _graph = UIManager.NewGraph();
+            }
         }
+
+        private void OnDisable()
+        {
+            _graph.graph.Save(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
+        }
+
+        private UIGraph _graph;
 
         private void Update()
         {

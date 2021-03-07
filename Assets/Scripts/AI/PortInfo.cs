@@ -23,7 +23,7 @@ namespace BattleSimulator.AI
         public PortFlags flags;
         public string name;
         public NodeInfo nodeInfo;
-        public PropertyInfo property;
+        public PropertyInfo propertyInfo;
 
         public static PortInfo Create (Node node, PropertyInfo property) 
         {
@@ -37,7 +37,7 @@ namespace BattleSimulator.AI
             portInfo.name = property.Name;
             portInfo.flags = PortFlags.None;
             portInfo.nodeInfo = NodeInfo.Create(node);
-            portInfo.property = property;
+            portInfo.propertyInfo = property;
 
             var attr = property.GetCustomAttribute<PortAttribute>();
             if(attr != null)
@@ -54,5 +54,7 @@ namespace BattleSimulator.AI
 
             return portInfo;
         }
+
+        public Port GetPort(Node node) => (Port)propertyInfo.GetValue(node);
     }
 }

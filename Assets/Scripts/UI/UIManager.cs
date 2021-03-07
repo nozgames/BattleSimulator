@@ -44,9 +44,15 @@ namespace BattleSimulator.UI
             return Color.gray;
         }
 
-        public static void NewGraph ()
-        {
+        public static UIGraph NewGraph () => 
             UIGraph.Create(new AI.Graph(), instance._graphPrefab, instance._graphs);
+
+        public static UIGraph LoadGraph (string path)
+        {
+            var graph = new Graph();
+            graph.Load(path);
+
+            return UIGraph.Create(graph, instance._graphPrefab, instance._graphs);
         }
 
         private void Awake()

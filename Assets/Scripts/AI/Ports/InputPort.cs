@@ -12,7 +12,7 @@ namespace BattleSimulator.AI
         /// </summary>
         protected void Execute(Context context)
         {
-            foreach (var wire in _wires)
+            foreach (var wire in wires)
                 wire.from.node.Execute(context);
         }
     }

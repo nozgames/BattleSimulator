@@ -11,20 +11,20 @@ namespace BattleSimulator.AI
 
         internal Priority Read(Context context, Func<List<Wire>, Priority> combiner = null)
         {
-            if (_wires.Count == 0)
+            if (wires.Count == 0)
                 return Priority.none;
 
             Execute(context);
 
             if (null != combiner)
-                return combiner(_wires);
+                return combiner(wires);
 
-            if (_wires.Count == 1)
-                return _wires[0].ReadPriority();
+            if (wires.Count == 1)
+                return wires[0].ReadPriority();
 
             // Default handling of multiple wires is to return the highest priority
             var result = Priority.none;
-            foreach (var wire in _wires)
+            foreach (var wire in wires)
             {
                 var wirevalue = wire.ReadPriority();
                 if (wirevalue > result)

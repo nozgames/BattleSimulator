@@ -1,9 +1,7 @@
 {
-    "name": "BattleSimulator.AI",
-    "rootNamespace": "BattleSimulator.AI",
-    "references": [
-        "GUID:33e5503f7a2420445a5e2bc4f549d6ca"
-    ],
+    "name": "BattleSimulator.Extensions",
+    "rootNamespace": "BattleSimulator.Extensions",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

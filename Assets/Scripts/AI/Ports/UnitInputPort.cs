@@ -11,17 +11,17 @@ namespace BattleSimulator.AI
 
         internal Target Read(Context context, Func<List<Wire>, Target> combiner = null)
         {
-            if (_wires.Count == 0)
+            if (wires.Count == 0)
                 return null;
 
             Execute(context);
 
             if (null != combiner)
-                return combiner(_wires);
+                return combiner(wires);
 
             // Default handling of multiple targets is to choose the first one
             // TODO: could do closest or something
-            return _wires[0].ReadUnit();
+            return wires[0].ReadUnit();
         }
     }
 }

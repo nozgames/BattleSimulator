@@ -5,17 +5,27 @@ namespace BattleSimulator.AI
 {
     public class Port
     {
-        internal List<Wire> _wires;
+        private PortInfo _info = null;
 
         /// <summary>
         /// Returns the number of wires in the given port
         /// </summary>
-        public int wireCount => _wires.Count;
-
+        public int wireCount => wires.Count;
 
         public Node node { get; private set; }
 
         public PortFlow flow { get; private set; }        
+
+        public List<Wire> wires { get; private set; }
+
+        public PortInfo info {
+            get {
+                if(_info == null)
+                    _info = NodeInfo.Create(node).GetPortInfo(this);
+
+                return _info;
+            }
+        }
 
         /// <summary>
         /// Construct the port with the node that the port belongs to
@@ -25,7 +35,7 @@ namespace BattleSimulator.AI
         {
             this.node = node;
             this.flow = flow;
-            _wires = new List<Wire>(1);
+            wires = new List<Wire>(1);
         }
 
         /// <summary>
@@ -57,7 +67,7 @@ namespace BattleSimulator.AI
             if (port == this)
                 return false;
 
-            foreach (var wire in _wires)
+            foreach (var wire in wires)
                 if (wire.from == port || wire.to == port)
                     return true;
 
@@ -68,7 +78,7 @@ namespace BattleSimulator.AI
         /// Connect the the port to the given port via a wire
         /// </summary>
         /// <param name="port">Port to connect to</param>
-        public void ConnectTo (Port port)
+        public Wire ConnectTo (Port port)
         {
             if (null == port)
                 throw new ArgumentNullException("port");
@@ -85,15 +95,17 @@ namespace BattleSimulator.AI
                 new Wire(this as OutputPort, port as InputPort) :
                 new Wire(port as OutputPort, this as InputPort));
 
-            _wires.Add(wire);
-            port._wires.Add(wire);
+            wires.Add(wire);
+            port.wires.Add(wire);
+
+            return wire;
         }
 
         private void Execute (Context context)
         {
             if(flow == PortFlow.Input)
             {
-                foreach (var wire in _wires)
+                foreach (var wire in wires)
                     wire.from.Execute(context);                
             }
             else

@@ -32,6 +32,8 @@ namespace BattleSimulator.UI
             if (null == nodeInfo)
                 return null;
 
+            node.position = position;
+
             UINode uinode = null;
             if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 uinode = Instantiate(prefab, parent).GetComponent<UINode>();
@@ -60,13 +62,18 @@ namespace BattleSimulator.UI
 
         public void MoveTo (Vector2 position)
         {
-            _rect.anchoredPosition = position;
-
-            foreach(var port in ports)
-                foreach (var wire in port.wires)
-                    wire.UpdateRenderer();
+            node.position = _rect.anchoredPosition = position;
         }
 
         public void Move(Vector2 position) => MoveTo(_rect.anchoredPosition += position);
+
+        public UIPort GetPort (Port port)
+        {
+            foreach (var uiport in ports)
+                if (uiport.port == port)
+                    return uiport;
+
+            return null;
+        }
     }
 }

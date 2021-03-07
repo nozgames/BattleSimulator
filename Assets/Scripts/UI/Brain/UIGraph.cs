@@ -64,6 +64,30 @@ namespace BattleSimulator
         {
             var uigraph = Instantiate(prefab, parent).GetComponent<UIGraph>();
             uigraph._graph = graph;
+
+            foreach (var node in graph.nodes)
+                uigraph.CreateNode(node, node.position);
+
+            foreach (var uinode in uigraph._nodes)
+            {
+                var fromNode = uinode.node;
+                var fromNodeInfo = NodeInfo.Create(fromNode);
+                foreach (var fromPortInfo in fromNodeInfo.ports)
+                {
+                    if (fromPortInfo.flow != PortFlow.Output)
+                        continue;
+
+                    var fromPort = fromPortInfo.GetPort(fromNode);
+                    foreach(var wire in fromPort.wires)
+                        UIWire.Create(
+                            wire,
+                            uigraph._wirePrefab,
+                            uigraph._wires,
+                            uinode.GetPort(fromPort),
+                            uigraph.GetNode(wire.to.node).GetPort(wire.to));
+                }
+            }
+
             return uigraph;
         }
 
@@ -131,7 +155,7 @@ namespace BattleSimulator
                         var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
                         var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
                         UIWire.Create(
-                            new Wire((OutputPort)from.port, (InputPort)to.port),
+                            from.port.ConnectTo(to.port),
                             _wirePrefab,
                             _wires,
                             from,
@@ -274,7 +298,9 @@ namespace BattleSimulator
             else
                 prefab = _nodePrefab;
 
-            return UINode.Create(this, node, prefab, parent == null ? _nodeTransform : parent, position);
+            var uinode = UINode.Create(this, node, prefab, parent == null ? _nodeTransform : parent, position);
+            _nodes.Add(uinode);
+            return uinode;
         }
 
         private void Execute (Command command, bool merge = true)
@@ -379,5 +405,19 @@ namespace BattleSimulator
             while (_selected.Count > 0)
                 UnselectNode(_selected[0]);
         }        
+
+        /// <summary>
+        /// Return the UI node for the give node
+        /// </summary>
+        /// <param name="node">Node to find</param>
+        /// <returns>UINode associated with the given node or null of not found</returns>
+        public UINode GetNode (Node node)
+        {
+            foreach (var uinode in _nodes)
+                if (uinode.node == node)
+                    return uinode;
+
+            return null;
+        }
     }
 }

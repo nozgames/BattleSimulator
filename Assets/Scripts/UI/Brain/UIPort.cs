@@ -22,7 +22,7 @@ namespace BattleSimulator.UI
         {
             var uiport = Instantiate(prefab, parent).GetComponent<UIPort>();
             uiport.portInfo = portInfo;
-            uiport.port = (Port)portInfo.property.GetValue(uinode.node);
+            uiport.port = (Port)portInfo.propertyInfo.GetValue(uinode.node);
             uiport.wires = new List<UIWire>();
             uiport.node = uinode;
             uiport._icon.color = UIManager.GetPortColor(uiport.port);

@@ -27,6 +27,8 @@ namespace BattleSimulator.AI
 
         public PortInfo[] ports { get; private set; }
 
+        public NodeProperty[] properties { get; private set; }
+
         public string name { get; private set; }
 
         public NodeFlags flags { get; private set; }
@@ -59,19 +61,33 @@ namespace BattleSimulator.AI
             _cache[type] = nodeInfo;
 
             var ports = new List<PortInfo>();
+            var nodeProperties = new List<NodeProperty>();
             for(; type != typeof(Node); type = type.BaseType)
             {
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
                 foreach(var property in properties)
                 {
-                    if (!typeof(Port).IsAssignableFrom(property.PropertyType))
+                    if (typeof(Port).IsAssignableFrom(property.PropertyType))
+                    {
+                        ports.Add(PortInfo.Create(node, property));
+                        continue;
+                    }
+
+                    if (property.GetCustomAttribute<SerializableAttribute>() == null)
                         continue;
 
-                    ports.Add(PortInfo.Create(node, property));                    
+                    var nodePropertyType = NodePropertyType.Unknown;
+                    if (property.PropertyType == typeof(float))
+                        nodePropertyType = NodePropertyType.Float;
+                    else
+                        throw new InvalidOperationException($"serialized property of type '{property.PropertyType.Name}' is not a supported NodeProperty type");
+
+                    nodeProperties.Add(new NodeProperty { name = property.Name, propertyInfo = property, type = nodePropertyType });
                 }
             }
 
             nodeInfo.ports = ports.ToArray();
+            nodeInfo.properties = nodeProperties.ToArray();
 
             var attr = nodeInfo.nodeType.GetCustomAttribute<NodeAttribute>(true);
             if (null != attr)
@@ -84,6 +100,33 @@ namespace BattleSimulator.AI
                 nodeInfo.name = nodeInfo.name.Substring(0, nodeInfo.name.Length - 4);
 
             return nodeInfo;
+        }
+
+        public NodeProperty GetProperty(string name)
+        {
+            foreach (var property in properties)
+                if (0 == string.Compare(property.propertyInfo.Name, name, true))
+                    return property;
+
+            return null;
+        }
+
+        public PortInfo GetPortInfo (string name)
+        {
+            foreach(var portInfo in ports)
+                if (0 == string.Compare(portInfo.propertyInfo.Name, name, true))
+                    return portInfo;
+
+            return null;
+        }
+
+        public PortInfo GetPortInfo (Port port)
+        {
+            foreach(var portInfo in ports)
+                if ((Port)portInfo.propertyInfo.GetValue(port.node) == port)
+                    return portInfo;
+
+            return null;
         }
     }
 }
