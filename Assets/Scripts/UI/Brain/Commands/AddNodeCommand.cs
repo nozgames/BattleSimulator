@@ -1,4 +1,5 @@
 ﻿using System;
+using BattleSimulator.AI;
 using UnityEngine;
 
 namespace BattleSimulator.UI
@@ -6,36 +7,31 @@ namespace BattleSimulator.UI
     internal class AddNodeCommand : Command
     {
         private UIGraph _uigraph;
-        private AI.Node _node;
         private UINode _uinode;
+        private NodeInfo _nodeInfo;
         private Vector2 _position;
         private Transform _parent;
 
-        public UINode uinode => _uinode;
-
-        public AddNodeCommand(UIGraph uigraph, AI.Node node, Vector2 position)
+        public AddNodeCommand(UIGraph uigraph, NodeInfo nodeInfo, Vector2 position)
         {
             _uigraph = uigraph;
-            _node = node;
             _position = position;
+            _nodeInfo = nodeInfo;
         }
 
         public AddNodeCommand(UIGraph uigraph, UINode uinode, Vector2 position)
         {
             _uigraph = uigraph;
-            _node = uinode.node;
             _uinode = uinode;
             _position = position;
+            _nodeInfo = uinode.nodeInfo;
         }
 
         public override void OnExecute()
         {
-            // Add the node to the graph first
-            _uigraph.graph.AddNode(_node);
-
             // Now add it to the uigraph
             if(_uinode == null)
-                _uinode = _uigraph.CreateNode(_node, _position);
+                _uinode = _uigraph.CreateNode(_nodeInfo, _position);
 
             _uigraph.SelectNode(_uinode);
 

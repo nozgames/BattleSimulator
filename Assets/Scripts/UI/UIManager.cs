@@ -22,9 +22,9 @@ namespace BattleSimulator.UI
         [SerializeField] private Color _booleanPortColor = Color.white;
         [SerializeField] private Color _actionPortCoor = Color.white;
 
-        public static Color GetPortColor (Port port)
+        public static Color GetPortColor (PortInfo portInfo)
         {
-            var type = port?.GetType();
+            var type = portInfo.type;
 
             if (type == typeof(FloatInputPort) || type == typeof(FloatOutputPort))
                 return instance._floatPortColor;

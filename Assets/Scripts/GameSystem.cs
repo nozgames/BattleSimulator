@@ -52,7 +52,7 @@ namespace BattleSimulator
 
         private void OnDisable()
         {
-            _graph.graph.Save(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
+            _graph.ToGraph().Save(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
         }
 
         private UIGraph _graph;

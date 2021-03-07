@@ -18,7 +18,6 @@ namespace BattleSimulator.UI
         public UIGraph uigraph { get; private set; }
         public UIPort[] ports { get; private set; }
         public NodeInfo nodeInfo { get; private set; }
-        public Node node { get; private set; }
         public Vector2 position => _rect.anchoredPosition;
 
         public bool selected {
@@ -26,14 +25,8 @@ namespace BattleSimulator.UI
             set => _selected.SetActive(value);
         }
 
-        public static UINode Create (UIGraph uigraph, Node node, GameObject prefab, RectTransform parent, Vector2 position)
+        public static UINode Create (UIGraph uigraph, NodeInfo nodeInfo, GameObject prefab, RectTransform parent, Vector2 position)
         {
-            var nodeInfo = NodeInfo.Create(node);
-            if (null == nodeInfo)
-                return null;
-
-            node.position = position;
-
             UINode uinode = null;
             if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 uinode = Instantiate(prefab, parent).GetComponent<UINode>();
@@ -44,7 +37,6 @@ namespace BattleSimulator.UI
             uinode.GetComponent<RectTransform>().anchoredPosition = position;
             uinode._name.text = nodeInfo.name;
             uinode.nodeInfo = nodeInfo;
-            uinode.node = node;
             uinode.ports = nodeInfo.ports.Select(port =>
                 UIPort.Create(
                     port,
@@ -62,15 +54,15 @@ namespace BattleSimulator.UI
 
         public void MoveTo (Vector2 position)
         {
-            node.position = _rect.anchoredPosition = position;
+            _rect.anchoredPosition = position;
         }
 
         public void Move(Vector2 position) => MoveTo(_rect.anchoredPosition += position);
 
-        public UIPort GetPort (Port port)
+        public UIPort GetPort (PortInfo portInfo)
         {
             foreach (var uiport in ports)
-                if (uiport.port == port)
+                if (uiport.portInfo == portInfo)
                     return uiport;
 
             return null;

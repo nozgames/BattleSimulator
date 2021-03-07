@@ -11,9 +11,8 @@ namespace BattleSimulator.UI
         [SerializeField] private TMPro.TextMeshProUGUI _name = null;
         [SerializeField] private Image _icon = null;
 
-        public UINode node { get; private set; }
+        public UINode uinode { get; private set; }
         public List<UIWire> wires { get; private set; }
-        public Port port { get; private set; }
         public PortInfo portInfo { get; private set; }
 
         public RectTransform connection => _icon.GetComponent<RectTransform>();
@@ -22,10 +21,9 @@ namespace BattleSimulator.UI
         {
             var uiport = Instantiate(prefab, parent).GetComponent<UIPort>();
             uiport.portInfo = portInfo;
-            uiport.port = (Port)portInfo.propertyInfo.GetValue(uinode.node);
             uiport.wires = new List<UIWire>();
-            uiport.node = uinode;
-            uiport._icon.color = UIManager.GetPortColor(uiport.port);
+            uiport.uinode = uinode;
+            uiport._icon.color = UIManager.GetPortColor(uiport.portInfo);
             uiport._name.text = portInfo.name;
 
             return uiport;
@@ -36,10 +34,10 @@ namespace BattleSimulator.UI
             if (uiport == null || uiport == this)
                 return false;
 
-            if (uiport.port.node == port.node)
+            if (uiport.uinode == uinode)
                 return false;
 
-            if (uiport.port.flow == port.flow)
+            if (uiport.portInfo.flow == portInfo.flow)
                 return false;
 
             return true;

@@ -41,13 +41,12 @@ namespace BattleSimulator
         private Vector2 _dragAnchorStart;
         private Stack<Command> _undo = new Stack<Command>();
         private Stack<Command> _redo = new Stack<Command>();
-        private Graph _graph;
 
-        private List<UINode> _nodes = new List<UINode>();
-
-        public AI.Graph graph => _graph;
+        private List<UINode> _nodes;
 
         public RectTransform trash => _trash;
+
+        public List<UINode> nodes => _nodes;
 
         private int zoomLevel 
         {
@@ -63,28 +62,31 @@ namespace BattleSimulator
         public static UIGraph Create (AI.Graph graph, GameObject prefab, RectTransform parent)
         {
             var uigraph = Instantiate(prefab, parent).GetComponent<UIGraph>();
-            uigraph._graph = graph;
-
+            uigraph._nodes = new List<UINode>(graph.nodes.Count);
             foreach (var node in graph.nodes)
-                uigraph.CreateNode(node, node.position);
+                uigraph.CreateNode(NodeInfo.Create(node), node.position);
 
-            foreach (var uinode in uigraph._nodes)
+            for(int nodeIndex=0; nodeIndex < graph.nodes.Count; nodeIndex++)
             {
-                var fromNode = uinode.node;
-                var fromNodeInfo = NodeInfo.Create(fromNode);
-                foreach (var fromPortInfo in fromNodeInfo.ports)
+                var uinode = uigraph._nodes[nodeIndex];
+                var node = graph.nodes[nodeIndex];
+
+                foreach(var fromPortInfo in uinode.nodeInfo.ports)
                 {
                     if (fromPortInfo.flow != PortFlow.Output)
                         continue;
 
-                    var fromPort = fromPortInfo.GetPort(fromNode);
+                    var uiport = uinode.GetPort(fromPortInfo);
+
+                    var fromPort = fromPortInfo.GetPort(node);
                     foreach(var wire in fromPort.wires)
+                    {
                         UIWire.Create(
-                            wire,
+                            uiport, // From
+                            uigraph._nodes[graph.nodes.IndexOf(wire.to.node)].GetPort(wire.to.info), // To
                             uigraph._wirePrefab,
-                            uigraph._wires,
-                            uinode.GetPort(fromPort),
-                            uigraph.GetNode(wire.to.node).GetPort(wire.to));
+                            uigraph._wires);
+                    }
                 }
             }
 
@@ -98,6 +100,9 @@ namespace BattleSimulator
 
             if (Input.GetKeyDown(KeyCode.Y) && Input.GetKey(KeyCode.LeftControl))
                 Redo();
+
+            if (Input.GetKeyDown(KeyCode.Delete))
+                DeleteSelectNodes();
         }
 
         private void Start()
@@ -138,7 +143,7 @@ namespace BattleSimulator
             // until we know there is no drag operation going on
             if (_drag == Drag.None && eventData.button == PointerEventData.InputButton.Left)
                 if (_dragPort != null)
-                    SelectNode(_dragPort.node);
+                    SelectNode(_dragPort.uinode);
                 else if (_dragNode != null && !_dragNode.selected)
                     SelectNode(_dragNode, Input.GetKey(KeyCode.LeftShift));
         }
@@ -152,14 +157,11 @@ namespace BattleSimulator
                     var targetPort = GetHoverComponent<UIPort>(eventData);
                     if (_dragPort.CanConnectTo(targetPort))
                     {
-                        var from = _dragPort.port.flow == PortFlow.Output ? _dragPort : targetPort;
-                        var to = _dragPort.port.flow == PortFlow.Input ? _dragPort : targetPort;
                         UIWire.Create(
-                            from.port.ConnectTo(to.port),
+                            _dragPort.portInfo.flow == PortFlow.Output ? _dragPort : targetPort,
+                            _dragPort.portInfo.flow == PortFlow.Input ? _dragPort : targetPort,
                             _wirePrefab,
-                            _wires,
-                            from,
-                            to);
+                            _wires);
                     }
 
                     break;
@@ -192,8 +194,8 @@ namespace BattleSimulator
                     var portBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(_zoomTransform, _dragPort.connection.GetComponent<RectTransform>());
 
                     _dragStart = _zoomTransform.InverseTransformPoint(_dragStart);
-                    _dragWire.fromColor = UIManager.GetPortColor(_dragPort.port);
-                    _dragWire.toColor = UIManager.GetPortColor(_dragPort.port);
+                    _dragWire.fromColor = UIManager.GetPortColor(_dragPort.portInfo);
+                    _dragWire.toColor = UIManager.GetPortColor(_dragPort.portInfo);
                     _dragWire.from = portBounds.center;
                     _dragWire.to = portBounds.center;
                     _dragWire.gameObject.SetActive(true);
@@ -257,7 +259,7 @@ namespace BattleSimulator
                         return;
 
                     var position = (Vector2)_zoomTransform.InverseTransformPoint(eventData.position);
-                    if (_dragPort.port.flow == PortFlow.Input)
+                    if (_dragPort.portInfo.flow == PortFlow.Input)
                         _dragWire.from = _dragAnchorStart + (position - _dragStart);
                     else
                         _dragWire.to = _dragAnchorStart + (position - _dragStart);
@@ -268,7 +270,7 @@ namespace BattleSimulator
                     if(_dragPort.CanConnectTo(snapPort))
                     {
                         var snapPortCenter = RectTransformUtility.CalculateRelativeRectTransformBounds(_zoomTransform, snapPort.connection.GetComponent<RectTransform>()).center;
-                        if (snapPort.port.flow == PortFlow.Input)
+                        if (snapPort.portInfo.flow == PortFlow.Input)
                             _dragWire.to = snapPortCenter;
                         else
                             _dragWire.from = snapPortCenter;
@@ -286,21 +288,40 @@ namespace BattleSimulator
             }
         }
 
-        public UINode CreateNode (Node node, Vector2 position, RectTransform parent = null)
+        public UINode CreateNode (NodeInfo nodeInfo, Vector2 position, RectTransform parent = null)
         {
-            var nodeInfo = NodeInfo.Create(node);
-            if (null == nodeInfo)
-                return null;
-
-            GameObject prefab = null;
+            var prefab = _nodePrefab;
             if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 prefab = _compressedNodePrefab;
-            else
-                prefab = _nodePrefab;
 
-            var uinode = UINode.Create(this, node, prefab, parent == null ? _nodeTransform : parent, position);
+            var uinode = UINode.Create(this, nodeInfo, prefab, parent == null ? _nodeTransform : parent, position);
             _nodes.Add(uinode);
             return uinode;
+        }
+
+        public void DeleteSelectNodes()
+        {
+            var group = new GroupCommand();
+            foreach (var selected in _selected)
+            {
+                foreach (var uiport in selected.ports)
+                {
+                    foreach (var wire in uiport.wires)
+                    {
+                        // To prevent double deleting the wire we check to see if input ports are 
+                        // connected to a seleted node, if they are we assume they will be deleted by their outputs
+                        if (uiport.portInfo.flow == PortFlow.Input && wire.from.uinode.selected)
+                            continue;
+
+                        group.Add(new DeleteWireCommand(wire));
+                    }
+                }
+
+                group.Add(new DeleteNodeCommand(selected));
+            }
+
+            UnselectAllNodes();
+            Execute(group);           
         }
 
         private void Execute (Command command, bool merge = true)
@@ -356,8 +377,7 @@ namespace BattleSimulator
         {
             RectTransformUtility.ScreenPointToLocalPointInRectangle(_zoomTransform, eventData.position, eventData.pressEventCamera, out var position);
 
-            var node = (AI.Node)Activator.CreateInstance(nodeInfo.nodeType);
-            _dragNode = CreateNode(node, position, _dragNodes);
+            _dragNode = CreateNode(nodeInfo, position, _dragNodes);
             _dragStart = position;
             _dragAnchorStart = position;
             _drag = Drag.CreateNode;
@@ -406,18 +426,35 @@ namespace BattleSimulator
                 UnselectNode(_selected[0]);
         }        
 
-        /// <summary>
-        /// Return the UI node for the give node
-        /// </summary>
-        /// <param name="node">Node to find</param>
-        /// <returns>UINode associated with the given node or null of not found</returns>
-        public UINode GetNode (Node node)
+        public Graph ToGraph ()
         {
-            foreach (var uinode in _nodes)
-                if (uinode.node == node)
-                    return uinode;
+            var graph = new Graph();
+            graph.nodes.Capacity = _nodes.Count;
 
-            return null;
+            foreach (var uinode in _nodes)
+                graph.nodes.Add(uinode.nodeInfo.CreateNode());
+
+            for(int nodeIndex=0; nodeIndex < _nodes.Count; nodeIndex++)
+            {
+                var uinode = _nodes[nodeIndex];
+                var node = graph.nodes[nodeIndex];
+                node.position = uinode.position;
+
+                foreach (var uiport in uinode.ports)
+                {
+                    if (uiport.portInfo.flow != PortFlow.Output)
+                        continue;
+
+                    foreach (var uiwire in uiport.wires)
+                    {
+                        var fromPort = uiport.portInfo.GetPort(node);
+                        var toPort = uiwire.to.portInfo.GetPort(graph.nodes[_nodes.IndexOf(uiwire.to.uinode)]);
+                        fromPort.ConnectTo(toPort);
+                    }
+                }
+            }
+
+            return graph;
         }
     }
 }

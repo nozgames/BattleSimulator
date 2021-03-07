@@ -32,5 +32,13 @@ namespace BattleSimulator.AI
         public Priority ReadPriority() => from.ReadPriority();
 
         public Target ReadUnit() => from.ReadUnit();
+
+        public void Disconnect ()
+        {
+            from.wires.Remove(this);
+            to.wires.Remove(this);
+            from = null;
+            to = null;
+        }
     }
 }

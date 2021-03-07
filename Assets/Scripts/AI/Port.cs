@@ -114,6 +114,6 @@ namespace BattleSimulator.AI
                 // TODO: need way to prevent unnecessary execution of nodes (compiler maybe)
                 node.Execute(context);
             }
-        }
+        }        
     }
 }

@@ -128,5 +128,7 @@ namespace BattleSimulator.AI
 
             return null;
         }
+
+        public Node CreateNode() => (Node)Activator.CreateInstance(nodeType);
     }
 }

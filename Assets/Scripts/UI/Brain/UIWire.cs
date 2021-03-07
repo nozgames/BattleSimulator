@@ -12,8 +12,6 @@ namespace BattleSimulator.UI
         private UIPort _from;
         private UIPort _to;
         private bool _dirty = true;
-
-        public Wire wire { get; private set; }
         
         public UIPort from {
             get => _from;
@@ -31,12 +29,11 @@ namespace BattleSimulator.UI
             }
         }
 
-        public static UIWire Create (Wire wire, GameObject prefab, RectTransform parent, UIPort from, UIPort to)
+        public static UIWire Create (UIPort from, UIPort to, GameObject prefab, RectTransform parent)
         {
             var uiwire = Instantiate(prefab, parent).GetComponent<UIWire>();
             uiwire.from = from;
             uiwire.to = to;
-            uiwire.wire = wire;
             uiwire._dirty = true;
 
             from.wires.Add(uiwire);
@@ -76,8 +73,8 @@ namespace BattleSimulator.UI
             _dirty = false;
             _renderer.from = fromPosition;
             _renderer.to = toPosition;
-            _renderer.fromColor = UIManager.GetPortColor(_from.port);
-            _renderer.toColor = UIManager.GetPortColor(_to.port);
+            _renderer.fromColor = UIManager.GetPortColor(_from.portInfo);
+            _renderer.toColor = UIManager.GetPortColor(_to.portInfo);
             _renderer.enabled = true;
         }
     }
