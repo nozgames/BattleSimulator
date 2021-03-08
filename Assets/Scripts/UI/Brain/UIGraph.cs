@@ -32,6 +32,7 @@ namespace BattleSimulator
         [SerializeField] private GameObject _nodePrefab = null;
         [SerializeField] private GameObject _compressedNodePrefab = null;
         [SerializeField] private GameObject _wirePrefab = null;
+        [SerializeField] private GameObject[] _nodePrefabs = null;
 
         private List<UINode> _selected = new List<UINode>();
         private int _zoomLevel = 10;
@@ -72,6 +73,10 @@ namespace BattleSimulator
             {
                 var uinode = uigraph._nodes[nodeIndex];
                 var node = graph.nodes[nodeIndex];
+
+                var uiNodeProperties = uinode.GetComponents<UINodeProperty>();
+                foreach (var uiNodeProperty in uiNodeProperties)
+                    uiNodeProperty.Write(node);
 
                 foreach(var fromPortInfo in uinode.nodeInfo.ports)
                 {
@@ -364,6 +369,14 @@ namespace BattleSimulator
             if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
                 prefab = _compressedNodePrefab;
 
+            if(!string.IsNullOrEmpty(nodeInfo.prefab))
+                foreach(var nodePrefab in _nodePrefabs)
+                    if(string.Compare(nodePrefab.name, nodeInfo.prefab, false) == 0)
+                    {
+                        prefab = nodePrefab;
+                        break;
+                    }
+
             var uinode = UINode.Create(this, nodeInfo, prefab, parent == null ? _nodeTransform : parent, position);
             _nodes.Add(uinode);
             return uinode;
@@ -511,6 +524,10 @@ namespace BattleSimulator
                 var uinode = _nodes[nodeIndex];
                 var node = graph.nodes[nodeIndex];
                 node.position = uinode.position;
+
+                var uiNodeProperties = uinode.GetComponents<UINodeProperty>();
+                foreach (var uiNodeProperty in uiNodeProperties)
+                    uiNodeProperty.Read(node);
 
                 foreach (var uiport in uinode.ports)
                 {

@@ -29,7 +29,9 @@ namespace BattleSimulator.UI
             uiport.wires = new List<UIWire>();
             uiport.uinode = uinode;
             uiport._icon.color = UIManager.GetPortColor(uiport.portInfo);
-            uiport._name.text = portInfo.name;
+
+            if(uiport._name != null)
+                uiport._name.text = portInfo.name;
 
             return uiport;
         }

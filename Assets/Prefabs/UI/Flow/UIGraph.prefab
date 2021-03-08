@@ -216,6 +216,8 @@ MonoBehaviour:
   _nodePrefab: {fileID: 1256781459892786169, guid: 32c360537e4cf014d81c950881e9dc03, type: 3}
   _compressedNodePrefab: {fileID: 1256781459892786169, guid: 32c360537e4cf014d81c950881e9dc03, type: 3}
   _wirePrefab: {fileID: 6914078226772187628, guid: 69985593c628a0444a2c70f57c4f6e45, type: 3}
+  _nodePrefabs:
+  - {fileID: 1256781459892786169, guid: 43dfac0c410501a449b844acca030acf, type: 3}
 --- !u!1 &1378966231013853543
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,8 +581,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1378966232016793126}
   m_HandleRect: {fileID: 1378966232016793127}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.99997705
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -872,7 +874,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000019240111}
+  m_AnchoredPosition: {x: 0, y: -0.000045776367}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1378966232065664848

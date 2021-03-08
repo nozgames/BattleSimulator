@@ -35,7 +35,10 @@ namespace BattleSimulator.UI
 
             uinode.uigraph = uigraph;
             uinode.GetComponent<RectTransform>().anchoredPosition = position;
-            uinode._name.text = nodeInfo.name;
+
+            if(uinode._name != null)
+                uinode._name.text = nodeInfo.name;
+
             uinode.nodeInfo = nodeInfo;
             uinode.ports = nodeInfo.ports.Select(port =>
                 UIPort.Create(

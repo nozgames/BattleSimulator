@@ -17,6 +17,7 @@ namespace BattleSimulator.AI
     {
         public NodeFlags flags { get; set; }
         public string name { get; set; }
+        public string prefab { get; set; }
     }
 
     public class NodeInfo
@@ -30,6 +31,8 @@ namespace BattleSimulator.AI
         public NodeProperty[] properties { get; private set; }
 
         public string name { get; private set; }
+
+        public string prefab { get; private set; }
 
         public NodeFlags flags { get; private set; }
 
@@ -73,7 +76,7 @@ namespace BattleSimulator.AI
                         continue;
                     }
 
-                    if (property.GetCustomAttribute<SerializableAttribute>() == null)
+                    if (property.GetCustomAttribute<SerializeField>() == null)
                         continue;
 
                     var nodePropertyType = NodePropertyType.Unknown;
@@ -94,6 +97,7 @@ namespace BattleSimulator.AI
             {
                 nodeInfo.flags = attr.flags;
                 nodeInfo.name = !string.IsNullOrEmpty(attr.name) ? attr.name : nodeInfo.name;
+                nodeInfo.prefab = attr.prefab;
             }
 
             if (nodeInfo.name.EndsWith("Node", StringComparison.OrdinalIgnoreCase))
