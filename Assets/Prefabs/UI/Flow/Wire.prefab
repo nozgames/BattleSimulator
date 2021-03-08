@@ -29,11 +29,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7245266808820157351, guid: 94172f8070ba78e4c8f4d0857ea2c28f, type: 3}
       propertyPath: m_Pivot.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7245266808820157351, guid: 94172f8070ba78e4c8f4d0857ea2c28f, type: 3}
       propertyPath: m_Pivot.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7245266808820157351, guid: 94172f8070ba78e4c8f4d0857ea2c28f, type: 3}
       propertyPath: m_RootOrder

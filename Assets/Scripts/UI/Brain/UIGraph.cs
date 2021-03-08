@@ -15,6 +15,7 @@ namespace BattleSimulator
             Graph,
             Port,
             Node,
+            Wire,
             CreateNode
         }
 
@@ -24,7 +25,7 @@ namespace BattleSimulator
         [SerializeField] private RectTransform _nodeTransform = null;
         [SerializeField] private RectTransform _wires = null;
         [SerializeField] private RectTransform _dragNodes = null;
-        [SerializeField] private UIWireRenderer _dragWire = null;
+        [SerializeField] private UIWireRenderer _dragWireRenderer = null;
         [SerializeField] private RectTransform _trash = null;
 
         [Header("Prefabs")]
@@ -39,6 +40,7 @@ namespace BattleSimulator
         private UINode _dragNode = null;
         private Vector2 _dragStart;
         private Vector2 _dragAnchorStart;
+        private UIWire _dragWire = null;
         private Stack<Command> _undo = new Stack<Command>();
         private Stack<Command> _redo = new Stack<Command>();
 
@@ -79,14 +81,10 @@ namespace BattleSimulator
                     var uiport = uinode.GetPort(fromPortInfo);
 
                     var fromPort = fromPortInfo.GetPort(node);
-                    foreach(var wire in fromPort.wires)
-                    {
-                        UIWire.Create(
-                            uiport, // From
-                            uigraph._nodes[graph.nodes.IndexOf(wire.to.node)].GetPort(wire.to.info), // To
-                            uigraph._wirePrefab,
-                            uigraph._wires);
-                    }
+                    foreach (var wire in fromPort.wires)
+                        uigraph.CreateWire(
+                            uiport,
+                            uigraph._nodes[graph.nodes.IndexOf(wire.to.node)].GetPort(wire.to.info));
                 }
             }
 
@@ -103,6 +101,8 @@ namespace BattleSimulator
 
             if (Input.GetKeyDown(KeyCode.Delete))
                 DeleteSelectNodes();
+
+            UpdateCursor(Input.mousePosition);
         }
 
         private void Start()
@@ -120,9 +120,12 @@ namespace BattleSimulator
 
         private T GetHoverComponent<T> (PointerEventData eventData) where T : MonoBehaviour
         {
-            foreach (var hover in eventData.hovered)
+            var results = new List<RaycastResult>();
+            UIManager.RayCast(eventData.position, results);
+
+            foreach (var result in results)
             {
-                var component = hover.GetComponent<T>();
+                var component = result.gameObject.GetComponentInParent<T>();
                 if (null != component)
                     return component;
             }
@@ -130,11 +133,37 @@ namespace BattleSimulator
             return null;
         }
 
+        private UIWire GetHoverWire (PointerEventData eventData) 
+        {
+            var results = new List<RaycastResult>();
+            UIManager.RayCast(eventData.position, results);
+
+            foreach (var result in results)
+            {
+                var uiwire = result.gameObject.GetComponent<UIWire>();
+                if (null == uiwire)
+                    continue;
+
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(uiwire.GetComponent<RectTransform>(), eventData.position, eventData.pressEventCamera, out var position);
+                if (uiwire.HitTest(position))
+                    return uiwire;
+            }
+
+            return null;
+        }
+
         public void OnPointerDown(PointerEventData eventData)
         {
-            _dragStart = eventData.position;            
+            _dragStart = eventData.position;
+            _drag = Drag.None;
+
             _dragPort = GetHoverComponent<UIPort>(eventData);
-            _drag = Drag.None;            
+            if(null == _dragPort)
+            {
+                _dragWire = GetHoverWire(eventData);
+                if (_dragWire != null)
+                    return;
+            }
 
             if (null == _dragPort)
                 _dragNode = GetHoverComponent<UINode>(eventData);
@@ -153,15 +182,26 @@ namespace BattleSimulator
             switch (_drag)
             {
                 case Drag.Port:
-                {
+                {                    
                     var targetPort = GetHoverComponent<UIPort>(eventData);
                     if (_dragPort.CanConnectTo(targetPort))
                     {
-                        UIWire.Create(
+                        var command = new GroupCommand();
+                        var input = _dragPort.isInput ? _dragPort : targetPort;
+                        if (!input.portInfo.flags.HasFlag(PortFlags.AllowMultipleWires) && input.wires.Count > 0)
+                            command.Add(new DeleteWireCommand(input.wires[0]));
+
+                        command.Add(new AddWireCommand(
                             _dragPort.portInfo.flow == PortFlow.Output ? _dragPort : targetPort,
-                            _dragPort.portInfo.flow == PortFlow.Input ? _dragPort : targetPort,
-                            _wirePrefab,
-                            _wires);
+                            _dragPort.portInfo.flow == PortFlow.Input ? _dragPort : targetPort));
+
+                        Execute(command);
+                    } 
+                    // If dragging an exsiting wire and no connection was made then remove the connection
+                    else if (targetPort == null && _dragWire != null)
+                    {                        
+                        Execute(new DeleteWireCommand(_dragWire));
+                        _dragWire.gameObject.SetActive(true);
                     }
 
                     break;
@@ -179,9 +219,10 @@ namespace BattleSimulator
                     break;
             }
 
-            _dragWire.gameObject.SetActive(false);
+            _dragWireRenderer.gameObject.SetActive(false);
             _drag = Drag.None;
             _dragPort = null;
+            _dragWire = null;
             _dragNode = null;
         }
 
@@ -189,16 +230,46 @@ namespace BattleSimulator
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
+                if (_dragWire != null)
+                {
+                    _dragWire.gameObject.SetActive(false);
+
+                    // Which side of the wire was the cursor closer to?
+                    var fromPosition = _dragWire.from.position;
+                    var toPosition = _dragWire.to.position;
+
+                    _dragStart = _zoomTransform.InverseTransformPoint(_dragStart);
+                    if ((_dragStart - fromPosition).sqrMagnitude > (_dragStart - toPosition).sqrMagnitude)
+                    {
+                        _dragPort = _dragWire.from;
+                        toPosition = _dragStart;
+                    } 
+                    else
+                    {
+                        _dragPort = _dragWire.to;
+                        fromPosition = _dragStart;
+                    }
+
+                    _dragWireRenderer.fromColor = UIManager.GetPortColor(_dragPort.portInfo);
+                    _dragWireRenderer.toColor = UIManager.GetPortColor(_dragPort.portInfo);
+                    _dragWireRenderer.from = fromPosition;
+                    _dragWireRenderer.to = toPosition;
+                    _dragWireRenderer.gameObject.SetActive(true);
+                    _dragAnchorStart = _dragStart;
+                    _drag = Drag.Port;
+                    return;
+                }
+
                 if (_dragPort != null)
                 {
                     var portBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(_zoomTransform, _dragPort.connection.GetComponent<RectTransform>());
 
                     _dragStart = _zoomTransform.InverseTransformPoint(_dragStart);
-                    _dragWire.fromColor = UIManager.GetPortColor(_dragPort.portInfo);
-                    _dragWire.toColor = UIManager.GetPortColor(_dragPort.portInfo);
-                    _dragWire.from = portBounds.center;
-                    _dragWire.to = portBounds.center;
-                    _dragWire.gameObject.SetActive(true);
+                    _dragWireRenderer.fromColor = UIManager.GetPortColor(_dragPort.portInfo);
+                    _dragWireRenderer.toColor = UIManager.GetPortColor(_dragPort.portInfo);
+                    _dragWireRenderer.from = portBounds.center;
+                    _dragWireRenderer.to = portBounds.center;
+                    _dragWireRenderer.gameObject.SetActive(true);
                     _dragAnchorStart = portBounds.center;
                     _drag = Drag.Port;
                     return;
@@ -260,20 +331,19 @@ namespace BattleSimulator
 
                     var position = (Vector2)_zoomTransform.InverseTransformPoint(eventData.position);
                     if (_dragPort.portInfo.flow == PortFlow.Input)
-                        _dragWire.from = _dragAnchorStart + (position - _dragStart);
+                        _dragWireRenderer.from = _dragAnchorStart + (position - _dragStart);
                     else
-                        _dragWire.to = _dragAnchorStart + (position - _dragStart);
+                        _dragWireRenderer.to = _dragAnchorStart + (position - _dragStart);
 
                     // Snap to valid ports
                     // TODO: change cursor when port is invalid like blueprint does
                     var snapPort = GetHoverComponent<UIPort>(eventData);
                     if(_dragPort.CanConnectTo(snapPort))
                     {
-                        var snapPortCenter = RectTransformUtility.CalculateRelativeRectTransformBounds(_zoomTransform, snapPort.connection.GetComponent<RectTransform>()).center;
                         if (snapPort.portInfo.flow == PortFlow.Input)
-                            _dragWire.to = snapPortCenter;
+                            _dragWireRenderer.to = snapPort.position;
                         else
-                            _dragWire.from = snapPortCenter;
+                            _dragWireRenderer.from = snapPort.position;
                     }
 
                     break;
@@ -298,6 +368,8 @@ namespace BattleSimulator
             _nodes.Add(uinode);
             return uinode;
         }
+
+        public UIWire CreateWire (UIPort from, UIPort to) => UIWire.Create(from, to, _wirePrefab, _wires);
 
         public void DeleteSelectNodes()
         {
@@ -455,6 +527,11 @@ namespace BattleSimulator
             }
 
             return graph;
+        }
+
+        private void UpdateCursor(Vector2 position)
+        {
+
         }
     }
 }

@@ -2,6 +2,9 @@
 using UnityEngine;
 
 using BattleSimulator.AI;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 namespace BattleSimulator.UI
 {
@@ -11,6 +14,7 @@ namespace BattleSimulator.UI
 
         [Header("General")]
         [SerializeField] private RectTransform _graphs = null;
+        [SerializeField] private GraphicRaycaster _raycaster = null;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _graphPrefab = null;
@@ -58,6 +62,16 @@ namespace BattleSimulator.UI
         private void Awake()
         {
             instance = this;
+        }
+
+        public static int RayCast (Vector2 position, List<RaycastResult> results)
+        {
+            var eventData = new PointerEventData(EventSystem.current);
+            eventData.position = position;
+
+            results.Clear();
+            instance._raycaster.Raycast(eventData, results);
+            return results.Count;
         }
     }
 }

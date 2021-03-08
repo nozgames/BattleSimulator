@@ -48,6 +48,8 @@ namespace UnityEngine.UI.Extensions
         [SerializeField, Tooltip("Segments to be drawn\n This is a list of arrays of points")]
 		internal List<Vector2[]> m_segments;
 
+		private Vector2[] _hitTestPoints;
+
         [SerializeField, Tooltip("Thickness of the line")]
         internal float lineThickness = 2;
         [SerializeField, Tooltip("Use the relative bounds of the Rect Transform (0,0 -> 0,1) or screen space coordinates")]
@@ -265,6 +267,8 @@ namespace UnityEngine.UI.Extensions
 				return;
 			}
 
+			_hitTestPoints = pointsToDraw;
+
 		}
 
         protected override void OnPopulateMesh(VertexHelper vh)
@@ -458,6 +462,27 @@ namespace UnityEngine.UI.Extensions
             dot /= from_p1_to_p2.magnitude;
             float t = Mathf.Clamp01(dot);
             return p1 + from_p1_to_p2 * t;
+        }
+
+		public float GetDistance (Vector2 pt0)
+        {
+			var distSqr = float.MaxValue;
+
+			if (_hitTestPoints == null)
+				return distSqr;
+
+			for(int i=0; i < _hitTestPoints.Length - 1; i++)
+            {
+				var pt1 = _hitTestPoints[i];
+				var pt2 = _hitTestPoints[i+1];
+				var seg = pt2 - pt1;
+				var n = seg.normalized;
+				var pt3 = pt1 + n * Mathf.Clamp01(Vector3.Dot(pt0 - pt1, n));
+
+				distSqr = Mathf.Min(distSqr, (pt0 - pt3).sqrMagnitude);
+			}
+
+			return Mathf.Sqrt(distSqr);
         }
     }
 }

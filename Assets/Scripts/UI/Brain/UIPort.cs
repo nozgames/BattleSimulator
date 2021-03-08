@@ -15,7 +15,12 @@ namespace BattleSimulator.UI
         public List<UIWire> wires { get; private set; }
         public PortInfo portInfo { get; private set; }
 
+        public bool isInput => portInfo.flow == PortFlow.Input;
+        public bool isOutput => portInfo.flow == PortFlow.Output;
+
         public RectTransform connection => _icon.GetComponent<RectTransform>();
+
+        public Vector2 position => RectTransformUtility.CalculateRelativeRectTransformBounds(uinode.transform.parent, connection).center;
 
         public static UIPort Create (PortInfo portInfo, UINode uinode, GameObject prefab, RectTransform parent)
         {
@@ -38,6 +43,12 @@ namespace BattleSimulator.UI
                 return false;
 
             if (uiport.portInfo.flow == portInfo.flow)
+                return false;
+
+            // Unit ports must connect to unit ports
+            var type0 = portInfo.type;
+            var type1 = uiport.portInfo.type;
+            if (type0 != type1 && (type0 == typeof(UnitOutputPort) || type0 == typeof(UnitInputPort)) != (type1 == typeof(UnitOutputPort) || type1 == typeof(UnitInputPort)))
                 return false;
 
             return true;

@@ -77,5 +77,7 @@ namespace BattleSimulator.UI
             _renderer.toColor = UIManager.GetPortColor(_to.portInfo);
             _renderer.enabled = true;
         }
+
+        public bool HitTest (Vector2 position) => _renderer.HitTest(position, 4);
     }
 }

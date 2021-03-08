@@ -72,18 +72,19 @@ namespace BattleSimulator.UI
             if (!isActiveAndEnabled)
                 return;
 
-            _rect.anchoredPosition = _from;
+            _rect.anchoredPosition = (_from + _to) * 0.5f;
+            _rect.sizeDelta = Vector2.Max(_from,_to) - Vector2.Min(_from,_to) + Vector2.one * 16;
 
             if (null != _fromCap)
             {
                 _fromCap.color = _fromColor;
-                _fromCap.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+                _fromCap.GetComponent<RectTransform>().anchoredPosition = _from - _rect.anchoredPosition;
             }
 
             if (null != _toCap)
             {
                 _toCap.color = _toColor;
-                _toCap.GetComponent<RectTransform>().anchoredPosition = _to - _from;
+                _toCap.GetComponent<RectTransform>().anchoredPosition = _to - _rect.anchoredPosition;
             }
 
             if (from == to)
@@ -96,14 +97,17 @@ namespace BattleSimulator.UI
             _line.enabled = true;
             _line.color = _fromColor;
 
-            var stem = (_to - _from).magnitude * _stemLength;
+            var stem = _rect.sizeDelta.magnitude * _stemLength;
 
             _line.Points = new Vector2[] {
-                Vector2.zero,
-                new Vector2(stem, 0),
-                (_to - _from) - new Vector2(stem, 0),
-                (_to - _from)
+                (_from - _rect.anchoredPosition),
+                (_from - _rect.anchoredPosition) + new Vector2(stem, 0),
+                (_to - _rect.anchoredPosition) - new Vector2(stem, 0),
+                (_to - _rect.anchoredPosition)
             };         
         }
+
+        public bool HitTest(Vector2 position, float threshold = 1.0f) =>
+            _line.GetDistance(position) <= _line.LineThickness + threshold;
     }
 }

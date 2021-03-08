@@ -2215,6 +2215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _graphs: {fileID: 1593661462}
+  _raycaster: {fileID: 712267216}
   _graphPrefab: {fileID: 1378966230857844156, guid: afc88e2855bd58549ae07aca47a4e4c9, type: 3}
   _floatPortColor: {r: 0, g: 0.48235297, b: 0.28627452, a: 1}
   _priorityPortColor: {r: 0.34509805, g: 0.29803923, b: 0.5176471, a: 1}
