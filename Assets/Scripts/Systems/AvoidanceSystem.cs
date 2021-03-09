@@ -23,7 +23,7 @@ namespace BattleSimulator
 
             Avoidance[] avoidanceVectors = new Avoidance[8];
 
-            for (int i = 0; i < units.Length - 1; i++)
+            for (int i = 0; i < units.Length; i++)
             {
                 if (units[i].Target == null)
                     continue;

@@ -3,25 +3,25 @@
 namespace BattleSimulator.AI
 {
     [Node(flags = NodeFlags.Compact)]
-    class OrNode : Node
+    class NotNode : Node
     {
         [Port(flags = PortFlags.AllowMultipleWires)]
         public BooleanInputPort input { get; private set; }
         public BooleanOutputPort output { get; private set; }
 
-        public OrNode()
+        public NotNode()
         {
             input = new BooleanInputPort(this);
             output = new BooleanOutputPort(this);
         }
 
-        private bool Combiner (List<Wire> wires)
+        private bool Combiner(List<Wire> wires)
         {
             foreach (var wire in wires)
                 if (wire.ReadBoolean())
-                    return true;
+                    return false;
 
-            return false;
+            return true;
         }
 
         public override bool Execute(Context context)

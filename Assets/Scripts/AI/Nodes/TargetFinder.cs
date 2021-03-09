@@ -3,6 +3,8 @@
     public class TargetFinder : Node
     {
         public PriorityInputPort priorityPort { get; private set; }
+
+        [Port(flags = PortFlags.AllowMultipleWires)]
         public BooleanInputPort filterPort { get; private set; }
 
         [Port(name = "priority")]

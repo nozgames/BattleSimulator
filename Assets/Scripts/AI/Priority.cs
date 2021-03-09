@@ -5,6 +5,7 @@ namespace BattleSimulator.AI
     public struct Priority
     {
         public static readonly Priority none = new Priority { value = 0.0f, weight = 0.0f };
+        public static readonly Priority one = new Priority { value = 1.0f, weight = 1.0f };
 
         private float _value;
 

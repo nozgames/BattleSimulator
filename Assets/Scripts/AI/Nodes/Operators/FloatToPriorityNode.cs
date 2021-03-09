@@ -27,7 +27,7 @@ namespace BattleSimulator.AI
             var value = inputPort.Read(context);
             var min = minPort.Read(context);
             var max = maxPort.Read(context);
-            var weight = weightPort.Read(context);
+            var weight = weightPort.Read(context, null, 1.0f);
 
             outputPort.value = new Priority {
                 weight = weight,

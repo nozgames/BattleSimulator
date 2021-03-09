@@ -23,6 +23,8 @@ namespace BattleSimulator
         [SerializeField] private float _size = 1.0f;
         [SerializeField] private int _team = 0;
 
+        private AI.Graph _graph;
+
         private static List<Unit> _units = new List<Unit>();
 
         private UnitAction[] _actions;
@@ -62,7 +64,10 @@ namespace BattleSimulator
         private void Awake()
         {
             // Find all actions this unit is capable of
-            _actions = GetComponentsInChildren<UnitAction>();    
+            _actions = GetComponentsInChildren<UnitAction>();
+
+            //_graph = new AI.Graph();
+            //_graph.Load(System.IO.Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
         }
 
         private void OnEnable()
@@ -98,6 +103,12 @@ namespace BattleSimulator
         /// <returns>Normalized direction</returns>
         public Vector3 DirectionToTarget(Target target) => (target.transform.position - transform.position).normalized;
 
+        public static void SetGraph (AI.Graph graph)
+        {
+            foreach (var unit in _units)
+                unit._graph = graph;
+        }
+
         public static void UpdateAll ()
         {
             // Copy the units into a states array
@@ -108,10 +119,52 @@ namespace BattleSimulator
             var avoidanceSystem = new AvoidanceSystem();
             avoidanceSystem.OnUpdate();
 
+            var aiunits = new AI.Target[_units.Count];
+            for(int i=0; i<_units.Count; i++)
+            {
+                aiunits[i] = new AI.Target();
+                aiunits[i].health = _units[i]._health;
+                aiunits[i].maxHealth = _units[i]._health;
+                aiunits[i].position = _units[i].transform.position;
+                aiunits[i].team = _units[i].Team;
+            }
+
             // All the unit brains can think in parallel as brain thinking should 
             // not change any unit data
-            foreach (var unit in _units)
+            for (int i = 0; i < _units.Count; i++)
             {
+                var unit = _units[i];
+                var aicontext = new AI.Context(aiunits[i], aiunits);
+                var aitarget = unit._graph.Execute(aicontext);
+
+                unit.Target = null;
+                if (aitarget != null)
+                {
+                    for(int j=0; j<aiunits.Length; j++)
+                    {
+                        if(aiunits[j] == aitarget)
+                        {
+                            unit.Target = _units[j];
+                            break;
+                        }
+                    }
+                }
+
+                if (unit.Target == null)
+                    continue;
+
+                var dir = unit.avoidance;
+                var enemy = unit.Target;
+                if (enemy.DistanceTo(unit) <= ((Unit)enemy).size + unit.size)
+                    dir = Vector3.zero;
+
+                unit.transform.rotation = Quaternion.LookRotation(unit.DirectionToTarget(enemy), Vector3.up);
+
+                dir.Normalize();
+
+                unit.transform.position += dir * unit._speed * Time.deltaTime;
+
+#if false
                 var enemy = FindClosestUnit(unit.transform.position, unit.FilterEnemy);
                 unit.Target = enemy;
                 var dir = unit.avoidance;
@@ -125,6 +178,7 @@ namespace BattleSimulator
                 dir.Normalize();
 
                 unit.transform.position += dir * unit._speed * Time.deltaTime;
+#endif
             }
 
             foreach (var unit in _units)

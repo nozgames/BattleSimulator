@@ -12,7 +12,7 @@ namespace BattleSimulator.AI
         internal Priority Read(Context context, Func<List<Wire>, Priority> combiner = null)
         {
             if (wires.Count == 0)
-                return Priority.none;
+                return Priority.one;
 
             Execute(context);
 

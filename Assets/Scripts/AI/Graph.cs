@@ -19,7 +19,7 @@ namespace BattleSimulator.AI
         public List<Node> nodes => _nodes;
 
         // TODO: what parameters
-        public void Execute(Context context)
+        public AI.Target Execute(Context context)
         {
             foreach (var action in _actions)
             {
@@ -44,8 +44,13 @@ namespace BattleSimulator.AI
                 // TODO: perform the action somehow..  Probably attach some data to the action that 
                 //       the caller can use to determine what action to perform.  Also need to trigger the cooldown as well.
 
-                bestAction.Perform();
+                //bestAction.Perform();
             }
+
+            if (bestAction is ActionNodeWithTarget actionWithTarget)
+                return actionWithTarget.target;
+
+            return null;
         }
 
         /// <summary>
@@ -172,7 +177,7 @@ namespace BattleSimulator.AI
                 var nodeType = Type.GetType(reader.ReadString());
                 var node = (Node)Activator.CreateInstance(nodeType);
                 node.position = new UnityEngine.Vector2(reader.ReadSingle(), reader.ReadSingle());
-                _nodes.Add(node);
+                AddNode(node);
             }
 
             // Read all node properties

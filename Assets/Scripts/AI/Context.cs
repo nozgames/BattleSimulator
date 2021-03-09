@@ -1,35 +1,36 @@
 ﻿
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BattleSimulator.AI
 {
     public class Context
     {
-        // TODO: unit stack
-        public Stack<Target> _unitStack;
+        public List<Target> _unitStack = new List<Target>();
 
         // TODO: action stack (current action)
 
         // TODO: this should be the second on the stack
-        public Target unit => _unitStack.Peek();
+        public Target unit => _unitStack[Mathf.Max(_unitStack.Count-2,0)];
 
-        public Target target => _unitStack.Peek();
+        public Target target => _unitStack[_unitStack.Count - 1];
 
         public Target[] units { get; private set; }
 
-        public Context(Target unit)
+        public Context(Target unit, Target[] units)
         {
-            _unitStack.Push(unit);
+            _unitStack.Add(unit);
+            this.units = units;
         }
 
         public void PushTarget (Target target)
         {
-            _unitStack.Push(target);
+            _unitStack.Add(target);
         }
 
         public void PopTarget ()
         {
-            _unitStack.Pop();
+            _unitStack.RemoveAt(_unitStack.Count - 1);
         }
     }
 }

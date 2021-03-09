@@ -10,10 +10,10 @@ namespace BattleSimulator.AI
         {
         }
 
-        internal float Read(Context context, Func<List<Wire>, float> combiner = null)
+        internal float Read(Context context, Func<List<Wire>, float> combiner = null, float defaultValue = 0.0f)
         {
             if (wires.Count == 0)
-                return 0.0f;
+                return defaultValue;
 
             Execute(context);
 

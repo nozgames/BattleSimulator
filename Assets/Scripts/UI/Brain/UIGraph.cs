@@ -517,7 +517,7 @@ namespace BattleSimulator
             graph.nodes.Capacity = _nodes.Count;
 
             foreach (var uinode in _nodes)
-                graph.nodes.Add(uinode.nodeInfo.CreateNode());
+                graph.AddNode(uinode.nodeInfo.CreateNode());
 
             for(int nodeIndex=0; nodeIndex < _nodes.Count; nodeIndex++)
             {

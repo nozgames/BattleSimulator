@@ -10,6 +10,8 @@ namespace BattleSimulator
     public class GameSystem : MonoBehaviour
     {
         private GameSystem _instance = null;
+        [SerializeField] private GameObject _unitsPrefab = null;
+        [SerializeField] private GameObject _units = null;
 
         private void Awake()
         {
@@ -23,6 +25,9 @@ namespace BattleSimulator
             {
                 _graph = UIManager.NewGraph();
             }
+
+            if (_units == null)
+                _units = Instantiate(_unitsPrefab);
         }
 
         private void OnApplicationQuit()
@@ -35,7 +40,31 @@ namespace BattleSimulator
         private void Update()
         {
             // Update all units
-            Unit.UpdateAll();
+            if (!_graph.isActiveAndEnabled)
+            {
+                if(Input.GetKeyDown(KeyCode.Space))
+                {
+                    DestroyImmediate(_units);
+                    _units = Instantiate(_unitsPrefab);
+                    Unit.SetGraph(_graph.ToGraph());
+                }
+
+                if(Input.GetKeyDown(KeyCode.Escape))
+                {
+                    _graph.gameObject.SetActive(true);
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Unit.SetGraph(_graph.ToGraph());
+                _graph.gameObject.SetActive(false);
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_graph.isActiveAndEnabled)
+                Unit.UpdateAll();
         }
     }
 }
