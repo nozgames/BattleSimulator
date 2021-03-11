@@ -511,9 +511,9 @@ namespace BattleSimulator
                 UnselectNode(_selected[0]);
         }        
 
-        public Graph ToGraph ()
+        public BrainGraph ToGraph ()
         {
-            var graph = new Graph();
+            var graph = new BrainGraph();
             graph.nodes.Capacity = _nodes.Count;
 
             foreach (var uinode in _nodes)

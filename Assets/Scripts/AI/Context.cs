@@ -1,31 +1,41 @@
 ﻿
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 namespace BattleSimulator.AI
 {
     public class Context
     {
-        public List<Target> _unitStack = new List<Target>();
+        public List<int> _unitStack = new List<int>();
 
         // TODO: action stack (current action)
 
         // TODO: this should be the second on the stack
-        public Target unit => _unitStack[Mathf.Max(_unitStack.Count-2,0)];
+        public Target unit => units[unitIndex];
 
-        public Target target => _unitStack[_unitStack.Count - 1];
+        public int unitIndex => _unitStack[Mathf.Max(_unitStack.Count - 2, 0)];
+
+        public int targetIndex => _unitStack[_unitStack.Count - 1];
+
+        public Target target => units[targetIndex];
+
+        public int executionId => (unitIndex << 16) + targetIndex;
 
         public Target[] units { get; private set; }
 
-        public Context(Target unit, Target[] units)
+        public Context(int unit, Target[] units)
         {
             _unitStack.Add(unit);
             this.units = units;
         }
 
-        public void PushTarget (Target target)
+        public void PushUnit (int unit)
         {
-            _unitStack.Add(target);
+            if (unit < 0 || unit >= units.Length)
+                return;
+
+            _unitStack.Add(unit);
         }
 
         public void PopTarget ()

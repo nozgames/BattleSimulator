@@ -12,8 +12,15 @@ namespace BattleSimulator.AI
         /// </summary>
         protected void Execute(Context context)
         {
+            var executionId = context.executionId;
             foreach (var wire in wires)
+            {
+                if (wire.from.node.lastExecutionId == executionId)
+                    continue;
+
+                wire.from.node.lastExecutionId = executionId;
                 wire.from.node.Execute(context);
+            }
         }
     }
 }

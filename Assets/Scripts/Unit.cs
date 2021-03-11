@@ -23,7 +23,7 @@ namespace BattleSimulator
         [SerializeField] private float _size = 1.0f;
         [SerializeField] private int _team = 0;
 
-        private AI.Graph _graph;
+        private AI.BrainGraph _graph;
 
         private static List<Unit> _units = new List<Unit>();
 
@@ -103,7 +103,7 @@ namespace BattleSimulator
         /// <returns>Normalized direction</returns>
         public Vector3 DirectionToTarget(Target target) => (target.transform.position - transform.position).normalized;
 
-        public static void SetGraph (AI.Graph graph)
+        public static void SetGraph (AI.BrainGraph graph)
         {
             foreach (var unit in _units)
                 unit._graph = graph;
@@ -133,8 +133,9 @@ namespace BattleSimulator
             // not change any unit data
             for (int i = 0; i < _units.Count; i++)
             {
+#if true
                 var unit = _units[i];
-                var aicontext = new AI.Context(aiunits[i], aiunits);
+                var aicontext = new AI.Context(i, aiunits);
                 var aitarget = unit._graph.Execute(aicontext);
 
                 unit.Target = null;
@@ -163,6 +164,7 @@ namespace BattleSimulator
                 dir.Normalize();
 
                 unit.transform.position += dir * unit._speed * Time.deltaTime;
+#endif
 
 #if false
                 var enemy = FindClosestUnit(unit.transform.position, unit.FilterEnemy);

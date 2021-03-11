@@ -6,6 +6,8 @@ namespace BattleSimulator.AI
     {
         public Vector2 position { get; set; }
 
+        public int lastExecutionId { get; set; }
+
         public abstract bool Execute(Context context);
     }
 }

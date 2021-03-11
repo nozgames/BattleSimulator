@@ -49,11 +49,11 @@ namespace BattleSimulator.UI
         }
 
         public static UIGraph NewGraph () => 
-            UIGraph.Create(new AI.Graph(), instance._graphPrefab, instance._graphs);
+            UIGraph.Create(new AI.BrainGraph(), instance._graphPrefab, instance._graphs);
 
         public static UIGraph LoadGraph (string path)
         {
-            var graph = new Graph();
+            var graph = new BrainGraph();
             graph.Load(path);
 
             return UIGraph.Create(graph, instance._graphPrefab, instance._graphs);

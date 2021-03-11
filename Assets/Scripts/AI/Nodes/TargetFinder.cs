@@ -24,9 +24,9 @@
             var bestPriority = Priority.none;
             var bestTarget = (Target)null;
 
-            foreach(var target in context.units)
+            for(int unitIndex=0; unitIndex<context.units.Length; unitIndex++)
             {
-                context.PushTarget(target);
+                context.PushUnit(unitIndex);
 
                 if(!filterPort.Read(context))
                 {
@@ -38,7 +38,7 @@
                 if(p.value * p.weight > bestPriority.value * bestPriority.weight)
                 {
                     bestPriority = p;
-                    bestTarget = target;
+                    bestTarget = context.target;
                 }
                 
                 context.PopTarget();

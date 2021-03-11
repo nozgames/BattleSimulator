@@ -5,53 +5,40 @@ using System.Linq;
 
 using BattleSimulator.Extensions;
 
+#if false
+
+- Register class
+- Compiling graph will use registers to values from ports
+
+
+- Preventing double execution of a node
+    - If within a context we flag the node as executed then it wouldnt execute again
+    - This does not work with target finders which may be referenced with a different stack
+    - Target finder node would need its own context depending on the unit that was calling it
+        - How to efficiently store state for each target combination?
+        - Would need to store the answer for each unit 
+            - Could use a native array of priorities
+
+    - Every ouput port has a state per unit basically 
+    - If we assign each port a register that has one value per unit?
+        - 1024 units / 256 ports = 262144 registers * 8 bytes per register = 2 MB 
+
+    - IF all nodes remember which unit they were last executed with they can early out if that unit is the same since the answer would be the same
+
+#endif
+
+
 namespace BattleSimulator.AI
 {
-    public class Graph
+    public abstract class Graph
     {
         private const int FileVersion = 1;
 
         private List<Node> _nodes = new List<Node>();
 
-        // TODO: This could be build from the node list afer loading a graph
-        private List<ActionNode> _actions = new List<ActionNode>();
-
         public List<Node> nodes => _nodes;
 
-        // TODO: what parameters
-        public AI.Target Execute(Context context)
-        {
-            foreach (var action in _actions)
-            {
-                action.Execute(context);
-            }
-
-            var bestPriority = Priority.none;
-            var bestAction = (ActionNode)null;
-            foreach (var action in _actions)
-            {
-                action.Execute(context);
-
-                if (action.priority > bestPriority)
-                {
-                    bestAction = action;
-                    bestPriority = action.priority;
-                }
-            }
-
-            if (bestAction != null)
-            {
-                // TODO: perform the action somehow..  Probably attach some data to the action that 
-                //       the caller can use to determine what action to perform.  Also need to trigger the cooldown as well.
-
-                //bestAction.Perform();
-            }
-
-            if (bestAction is ActionNodeWithTarget actionWithTarget)
-                return actionWithTarget.target;
-
-            return null;
-        }
+        public abstract void Compile();
 
         /// <summary>
         /// Add a node to the graph
@@ -63,9 +50,6 @@ namespace BattleSimulator.AI
                 return;
 
             _nodes.Add(node);
-
-            if (node is ActionNode actionNode)
-                _actions.Add(actionNode);
         }
 
         /// <summary>
@@ -75,9 +59,6 @@ namespace BattleSimulator.AI
         public void RemoveNode(Node node)
         {
             _nodes.Remove(node);
-
-            if (node is ActionNode actionNode)
-                _actions.Remove(actionNode);
         }
 
         public void Save(string filename)
