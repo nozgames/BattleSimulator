@@ -6,6 +6,8 @@ namespace BattleSimulator
 {
     class AvoidanceSystem
     {
+        private const float Spacing = 0.2f;
+
         private struct Avoidance
         {
             public float weight;
@@ -43,7 +45,7 @@ namespace BattleSimulator
                         continue;
 
                     // Minimum desired distance the two units should be from each other 
-                    var minDistance = units[i].size + units[j].size;
+                    var minDistance = units[i].size + units[j].size + Spacing;
 
                     // Actual distance between the two units
                     var distance = units[i].DistanceTo(units[j]);

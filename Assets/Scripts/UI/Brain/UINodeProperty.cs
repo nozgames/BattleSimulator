@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 
 namespace BattleSimulator.UI
 {
@@ -7,9 +7,9 @@ namespace BattleSimulator.UI
     {
         [SerializeField] protected string _propertyName = null;
 
-        public abstract void Read(AI.Node node);
+        public abstract void Read(Node node);
 
-        public abstract void Write(AI.Node node);
+        public abstract void Write(Node node);
 
         protected NodeProperty GetProperty(Node node) => NodeInfo.Create(node).GetProperty(_propertyName);
     }

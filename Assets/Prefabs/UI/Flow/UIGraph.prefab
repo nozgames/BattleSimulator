@@ -213,6 +213,7 @@ MonoBehaviour:
   _dragNodes: {fileID: 1378966231858667695}
   _dragWireRenderer: {fileID: 1378966231534160841}
   _trash: {fileID: 2722046813990142487}
+  _nodePalette: {fileID: 1378966232112274318}
   _nodePrefab: {fileID: 1256781459892786169, guid: 32c360537e4cf014d81c950881e9dc03, type: 3}
   _compressedNodePrefab: {fileID: 1256781459892786169, guid: 32c360537e4cf014d81c950881e9dc03, type: 3}
   _wirePrefab: {fileID: 6914078226772187628, guid: 69985593c628a0444a2c70f57c4f6e45, type: 3}
@@ -581,7 +582,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1378966232016793126}
   m_HandleRect: {fileID: 1378966232016793127}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

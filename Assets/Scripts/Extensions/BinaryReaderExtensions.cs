@@ -28,9 +28,6 @@ namespace BattleSimulator.Extensions
         /// </summary>
         /// <param name="reader">Reader</param>
         /// <returns>Guid</returns>
-        public static Guid ReadGuid(this BinaryReader reader)
-        {
-            return new Guid(reader.ReadBytes(16));
-        }
+        public static Guid ReadGuid(this BinaryReader reader) => new Guid(reader.ReadBytes(16));
     }
 }

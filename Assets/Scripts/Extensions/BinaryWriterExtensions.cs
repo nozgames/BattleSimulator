@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace BattleSimulator.Extensions
@@ -18,6 +19,11 @@ namespace BattleSimulator.Extensions
             writer.Write((byte)b);
             writer.Write((byte)c);
             writer.Write((byte)d);
+        }
+
+        public static void Write(this BinaryWriter writer, Guid guid)
+        {
+            writer.Write(guid.ToByteArray());
         }
     }
 }

@@ -1,12 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using System.Linq;
 using UnityEngine;
+
+using BattleSimulator.Abilities;
 
 namespace BattleSimulator
 {
-    [CreateAssetMenu(fileName = "New UnitDef", menuName = "Battle Simulator/UnitDef")]
-    public class UnitDef : ScriptableObject
+    [CreateAssetMenu(fileName = "New Unit", menuName = "BattleSimulator/Unit")]
+    public class UnitDef : ScriptableObjectWithGuid
     {
-        [SerializeReference] [SerializeField] public List<UnitActionDef> _actions = new List<UnitActionDef>();
+        [SerializeField] private Ability[] _abilities = null;
+
+        public Ability[] abilities => _abilities;
+
+        public Ability GetAbility(Guid id) => _abilities.FirstOrDefault(a => a.guid == id);
     }
 }

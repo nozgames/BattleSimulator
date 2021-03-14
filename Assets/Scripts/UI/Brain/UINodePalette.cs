@@ -1,7 +1,7 @@
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using BattleSimulator.Simulation;
 
 namespace BattleSimulator.UI
 {
@@ -14,7 +14,7 @@ namespace BattleSimulator.UI
         private void Start()
         {
             // TODO: order by group and name
-            foreach (var type in System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && typeof(AI.Node).IsAssignableFrom(t))))
+            foreach (var type in System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && typeof(Node).IsAssignableFrom(t))))
             {
                 var item = UINodePaletteItem.Create(type, _itemPrefab, _content);
                 if (null == item)
@@ -26,19 +26,30 @@ namespace BattleSimulator.UI
             }
         }
 
+        public void Add (Abilities.Ability ability)
+        {
+            var item = UINodePaletteItem.Create(ability, _itemPrefab, _content);
+            if (null == item)
+                return;
+
+            item.onDragBegin += OnItemDragBegin;
+            item.onDragEnd += OnItemDragEnd;
+            item.onDrag += OnItemDrag;
+        }
+
         private void OnItemDragBegin(UIListItem item, PointerEventData eventData)
         {
-            GetComponentInParent<UIGraph>().BeginDrag(((UINodePaletteItem)item).nodeInfo, eventData);
+            GetComponentInParent<UIGraph>().BeginDrag((UINodePaletteItem)item, eventData);
         }
 
         private void OnItemDragEnd(UIListItem item, PointerEventData eventData)
         {
-            GetComponentInParent<UIGraph>().EndDrag (((UINodePaletteItem)item).nodeInfo, eventData);
+            GetComponentInParent<UIGraph>().EndDrag ((UINodePaletteItem)item, eventData);
         }
 
         private void OnItemDrag(UIListItem item, PointerEventData eventData)
         {
-            GetComponentInParent<UIGraph>().ContinueDrag(((UINodePaletteItem)item).nodeInfo, eventData);
+            GetComponentInParent<UIGraph>().ContinueDrag((UINodePaletteItem)item, eventData);
         }
     }
 }

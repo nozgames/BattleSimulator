@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3367438123469428250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 901c4b63cc61e344bb6afad892051949, type: 3}
+  m_Name: GlobalCooldown
+  m_EditorClassIdentifier: 
+  _active: 1
+  _duration: 0.4
+--- !u!114 &-1061537476601098720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b7a2e3093a31724c964976af4c79bcc, type: 3}
+  m_Name: PlayAnimation
+  m_EditorClassIdentifier: 
+  _active: 1
+  _name: CubeMeleeAttack1H
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa26e748c34b834c9c9b20d39572a38, type: 3}
+  m_Name: CubeSwordAttack
+  m_EditorClassIdentifier: 
+  _guid: 4c068d0f-1f5d-4d6b-8536-42796a153c23
+  _displayName: 
+  _components:
+  - {fileID: -1061537476601098720}
+  - {fileID: -3367438123469428250}
+  - {fileID: 4590421453366604308}
+--- !u!114 &4590421453366604308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75a1c7f38bf30ee43a96bbdd9dc8e608, type: 3}
+  m_Name: Range
+  m_EditorClassIdentifier: 
+  _active: 1
+  _min: 0
+  _max: 0.5

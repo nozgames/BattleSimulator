@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 using System.Linq;
 
 namespace BattleSimulator.UI
@@ -20,9 +20,23 @@ namespace BattleSimulator.UI
         public NodeInfo nodeInfo { get; private set; }
         public Vector2 position => _rect.anchoredPosition;
 
+        public Abilities.Ability ability { get; private set; }
+
         public bool selected {
             get => _selected.activeSelf;
             set => _selected.SetActive(value);
+        }
+
+        public static UINode Create(UIGraph uigraph, Abilities.Ability ability, GameObject prefab, RectTransform parent, Vector2 position)
+        {
+            var nodeInfo = NodeInfo.Create(typeof(AbilityNodeWithTarget));
+            var uinode = Create(uigraph, nodeInfo, prefab, parent, position);
+            uinode.ability = ability;
+
+            if (uinode._name != null)
+                uinode._name.text = ability.name;
+
+            return uinode;
         }
 
         public static UINode Create (UIGraph uigraph, NodeInfo nodeInfo, GameObject prefab, RectTransform parent, Vector2 position)

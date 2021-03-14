@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using BattleSimulator.UI;
-using BattleSimulator.AI;
-using System;
+using BattleSimulator.Simulation;
 
 namespace BattleSimulator
 {
@@ -27,6 +26,7 @@ namespace BattleSimulator
         [SerializeField] private RectTransform _dragNodes = null;
         [SerializeField] private UIWireRenderer _dragWireRenderer = null;
         [SerializeField] private RectTransform _trash = null;
+        [SerializeField] private UINodePalette _nodePalette = null;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _nodePrefab = null;
@@ -34,6 +34,7 @@ namespace BattleSimulator
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private GameObject[] _nodePrefabs = null;
 
+        private UnitDef _unitDef;
         private List<UINode> _selected = new List<UINode>();
         private int _zoomLevel = 10;
         private Drag _drag = Drag.None;
@@ -62,12 +63,29 @@ namespace BattleSimulator
             }
         }
 
-        public static UIGraph Create (AI.Graph graph, GameObject prefab, RectTransform parent)
+        public static UIGraph Create (Graph graph, GameObject prefab, RectTransform parent)
         {
             var uigraph = Instantiate(prefab, parent).GetComponent<UIGraph>();
+
+            // Load the unit definition for the given graph
+            uigraph._unitDef = GameSystem.unitDatabase.GetRecord<UnitDef>(graph.unitDef);
+            if (uigraph._unitDef != null)
+            {
+                foreach (var ability in uigraph._unitDef.abilities)
+                    uigraph._nodePalette.Add(ability);
+            }
+
             uigraph._nodes = new List<UINode>(graph.nodes.Count);
             foreach (var node in graph.nodes)
-                uigraph.CreateNode(NodeInfo.Create(node), node.position);
+            {
+                if (node is AbilityNodeWithTarget abilityNode)
+                {
+                    var ability = uigraph._unitDef.GetAbility(abilityNode.guid);
+                    if(ability != null)
+                        uigraph.CreateNode(ability, node.position);
+                } else
+                    uigraph.CreateNode(NodeInfo.Create(node), node.position);
+            }
 
             for(int nodeIndex=0; nodeIndex < graph.nodes.Count; nodeIndex++)
             {
@@ -363,6 +381,26 @@ namespace BattleSimulator
             }
         }
 
+        public UINode CreateNode(Abilities.Ability ability, Vector2 position, RectTransform parent = null)
+        {
+            var nodeInfo = NodeInfo.Create(typeof(AbilityNodeWithTarget));
+            var prefab = _nodePrefab;
+            if (nodeInfo.flags.HasFlag(NodeFlags.Compact))
+                prefab = _compressedNodePrefab;
+
+            if (!string.IsNullOrEmpty(nodeInfo.prefab))
+                foreach (var nodePrefab in _nodePrefabs)
+                    if (string.Compare(nodePrefab.name, nodeInfo.prefab, false) == 0)
+                    {
+                        prefab = nodePrefab;
+                        break;
+                    }
+
+            var uinode = UINode.Create(this, ability, prefab, parent == null ? _nodeTransform : parent, position);
+            _nodes.Add(uinode);
+            return uinode;
+        }
+
         public UINode CreateNode (NodeInfo nodeInfo, Vector2 position, RectTransform parent = null)
         {
             var prefab = _nodePrefab;
@@ -458,18 +496,20 @@ namespace BattleSimulator
                 SelectNode(selected, true);
         }
 
-        public void BeginDrag (AI.NodeInfo nodeInfo, PointerEventData eventData)
+        public void BeginDrag (UINodePaletteItem item, PointerEventData eventData)
         {
             RectTransformUtility.ScreenPointToLocalPointInRectangle(_zoomTransform, eventData.position, eventData.pressEventCamera, out var position);
 
-            _dragNode = CreateNode(nodeInfo, position, _dragNodes);
+            _dragNode = item.ability != null ? 
+                CreateNode(item.ability, position, _dragNodes) :
+                CreateNode(item.nodeInfo, position, _dragNodes);
             _dragStart = position;
             _dragAnchorStart = position;
             _drag = Drag.CreateNode;
             SelectNode(_dragNode);
         }
 
-        public void EndDrag (AI.NodeInfo nodeInfo, PointerEventData eventData)
+        public void EndDrag (UINodePaletteItem item, PointerEventData eventData)
         {
             if (_drag != Drag.CreateNode)
                 return;
@@ -478,7 +518,7 @@ namespace BattleSimulator
             Execute(new AddNodeCommand(this, _dragNode, _dragNode.position));
         }
 
-        public void ContinueDrag(AI.NodeInfo nodeInfo, PointerEventData eventData)
+        public void ContinueDrag(UINodePaletteItem item, PointerEventData eventData)
         {
             if (_drag != Drag.CreateNode)
                 return;
@@ -513,11 +553,20 @@ namespace BattleSimulator
 
         public BrainGraph ToGraph ()
         {
-            var graph = new BrainGraph();
+            var graph = new BrainGraph(_unitDef.guid);
             graph.nodes.Capacity = _nodes.Count;
 
             foreach (var uinode in _nodes)
-                graph.AddNode(uinode.nodeInfo.CreateNode());
+            {
+                var node = uinode.nodeInfo.CreateNode();
+                if (null == node)
+                    continue;
+
+                if (node is AbilityNodeWithTarget abilityNode)
+                    abilityNode.guid = uinode.ability.guid;
+
+                graph.AddNode(node);
+            }
 
             for(int nodeIndex=0; nodeIndex < _nodes.Count; nodeIndex++)
             {

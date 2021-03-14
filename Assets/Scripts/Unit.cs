@@ -5,6 +5,9 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Mathematics;
 
+using BattleSimulator.Simulation;
+using BattleSimulator.Abilities;
+
 namespace BattleSimulator
 {
     public struct UnitState
@@ -23,14 +26,15 @@ namespace BattleSimulator
         [SerializeField] private float _size = 1.0f;
         [SerializeField] private int _team = 0;
 
-        private AI.BrainGraph _graph;
+        private BrainGraph _graph;
 
         private static List<Unit> _units = new List<Unit>();
 
-        private UnitAction[] _actions;
+        [SerializeField] private Ability[] _abilities = null;
 
         private int _index;
 
+        public float globalCooldown { get; set; }
 
         public int Team => _team;
 
@@ -63,8 +67,6 @@ namespace BattleSimulator
 
         private void Awake()
         {
-            // Find all actions this unit is capable of
-            _actions = GetComponentsInChildren<UnitAction>();
 
             //_graph = new AI.Graph();
             //_graph.Load(System.IO.Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
@@ -103,7 +105,7 @@ namespace BattleSimulator
         /// <returns>Normalized direction</returns>
         public Vector3 DirectionToTarget(Target target) => (target.transform.position - transform.position).normalized;
 
-        public static void SetGraph (AI.BrainGraph graph)
+        public static void SetGraph (BrainGraph graph)
         {
             foreach (var unit in _units)
                 unit._graph = graph;
@@ -119,10 +121,10 @@ namespace BattleSimulator
             var avoidanceSystem = new AvoidanceSystem();
             avoidanceSystem.OnUpdate();
 
-            var aiunits = new AI.Target[_units.Count];
+            var aiunits = new Simulation.Target[_units.Count];
             for(int i=0; i<_units.Count; i++)
             {
-                aiunits[i] = new AI.Target();
+                aiunits[i] = new Simulation.Target();
                 aiunits[i].health = _units[i]._health;
                 aiunits[i].maxHealth = _units[i]._health;
                 aiunits[i].position = _units[i].transform.position;
@@ -135,8 +137,20 @@ namespace BattleSimulator
             {
 #if true
                 var unit = _units[i];
-                var aicontext = new AI.Context(i, aiunits);
-                var aitarget = unit._graph.Execute(aicontext);
+
+                unit.globalCooldown = Mathf.Max(unit.globalCooldown - Time.deltaTime, 0.0f);
+
+                if (unit.globalCooldown > 0.0f)
+                    continue;
+
+                var aicontext = new Context(i, aiunits);
+                var (abilityGuid, aitarget) = unit._graph.Execute(aicontext);
+
+                var unitDef = GameSystem.unitDatabase.GetRecord<UnitDef>(unit._graph.unitDef);
+                var ability = unitDef.GetAbility(abilityGuid);
+
+                if(ability != null)
+                    ability.ToPresentation(unit);
 
                 unit.Target = null;
                 if (aitarget != null)
@@ -144,7 +158,7 @@ namespace BattleSimulator
                     for(int j=0; j<aiunits.Length; j++)
                     {
                         if(aiunits[j] == aitarget)
-                        {
+                        {                            
                             unit.Target = _units[j];
                             break;
                         }
@@ -196,35 +210,6 @@ namespace BattleSimulator
 //                _units[i].State = unitStates[i];
 
             unitStates.Dispose();
-        }
-
-        private void Think()
-        {
-            // Update all action priorities
-            foreach (var action in _actions)
-                action.CalculatePriority();
-
-            var bestAction = (UnitAction)null;
-            var bestActionPriority = 0.0f;
-            foreach (var action in _actions)
-            {
-                if(action.priority > bestActionPriority)
-                {
-                    bestActionPriority = action.priority;
-                    bestAction = action;
-                }
-            }
-
-            if (null == bestAction)
-                return;
-
-            if(!bestAction.isInRange)
-            {
-                // TODO: retreat if too close
-                // TODO: move toward if too far
-            }
-
-            bestAction.Perform(Time.deltaTime);
         }
 
         public static Unit[] GetUnits() => _units.ToArray();

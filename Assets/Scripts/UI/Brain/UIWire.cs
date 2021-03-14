@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 
 namespace BattleSimulator.UI
 {

@@ -1,0 +1,17 @@
+{
+    "name": "BattleSimulatorEditor",
+    "rootNamespace": "BattleSimulator",
+    "references": [
+        "GUID:3eae0364be2026648bf74846acb8a731",
+        "GUID:3d5295f4134f389499c74dc921fc7572"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

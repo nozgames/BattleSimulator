@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
@@ -48,13 +48,14 @@ namespace BattleSimulator.UI
             return Color.gray;
         }
 
-        public static UIGraph NewGraph () => 
-            UIGraph.Create(new AI.BrainGraph(), instance._graphPrefab, instance._graphs);
+        public static UIGraph NewGraph (UnitDef unitDef) => 
+            UIGraph.Create(new BrainGraph(unitDef.guid), instance._graphPrefab, instance._graphs);
 
         public static UIGraph LoadGraph (string path)
         {
-            var graph = new BrainGraph();
-            graph.Load(path);
+            var graph = BrainGraph.Load(path);
+            if (graph == null)
+                return NewGraph(GameSystem.unitDatabase.GetRecord<UnitDef>(0));
 
             return UIGraph.Create(graph, instance._graphPrefab, instance._graphs);
         }

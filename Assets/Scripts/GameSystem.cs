@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 using BattleSimulator.UI;
 using System.IO;
 using System;
@@ -9,9 +9,10 @@ namespace BattleSimulator
 {
     public class GameSystem : MonoBehaviour
     {
-        private GameSystem _instance = null;
+        private static GameSystem _instance = null;
         [SerializeField] private GameObject _unitsPrefab = null;
         [SerializeField] private GameObject _units = null;
+        [SerializeField] private ScriptableObjectDatabase _unitDatabase = null;
 
         private void Awake()
         {
@@ -23,7 +24,7 @@ namespace BattleSimulator
             } 
             catch 
             {
-                _graph = UIManager.NewGraph();
+                _graph = UIManager.NewGraph(_unitDatabase.GetRecord<UnitDef>(0));
             }
 
             if (_units == null)
@@ -36,6 +37,8 @@ namespace BattleSimulator
         }
 
         private UIGraph _graph;
+
+        public static ScriptableObjectDatabase unitDatabase => _instance._unitDatabase;
 
         private void Update()
         {

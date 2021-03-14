@@ -1,5 +1,5 @@
 ﻿using System;
-using BattleSimulator.AI;
+using BattleSimulator.Simulation;
 using UnityEngine;
 
 namespace BattleSimulator.UI
