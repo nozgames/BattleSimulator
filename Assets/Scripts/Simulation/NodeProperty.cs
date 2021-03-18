@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace BattleSimulator.Simulation
 {
@@ -35,6 +34,10 @@ namespace BattleSimulator.Simulation
         /// <returns>New NodeProperty or null if the property could not be created.</returns>
         public static NodeProperty FromPropertyInfo(PropertyInfo propertyInfo)
         {
+            var nodePropertyInfo = propertyInfo.GetCustomAttribute<NodePropertyInfo>();
+            if (null == nodePropertyInfo)
+                return null;
+
             NodePropertyType nodePropertyType;
             if (propertyInfo.PropertyType == typeof(float))
                 nodePropertyType = NodePropertyType.Float;
@@ -45,15 +48,11 @@ namespace BattleSimulator.Simulation
             else
                 return null;
 
-            NodePropertyFlags flags = NodePropertyFlags.None;
-            if(propertyInfo.GetCustomAttribute<HideInInspector>() != null)
-                flags |= NodePropertyFlags.Hidden;
-
             return new NodeProperty {
                 name = propertyInfo.Name,
                 propertyInfo = propertyInfo,
                 type = nodePropertyType,
-                flags = flags
+                flags = nodePropertyInfo.Flags
             };
         }
     }

@@ -14,6 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _active: 1
   _duration: 0.4
+--- !u!114 &-2123096470968183505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee7fe7c188384c547afa0bfdbe5682ee, type: 3}
+  m_Name: ApplyEffectToTarget
+  m_EditorClassIdentifier: 
+  _active: 1
+  _effects:
+  - {fileID: 11400000, guid: b4c45f8ea5620424992b839fdb203c8f, type: 2}
 --- !u!114 &-1061537476601098720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46,6 +61,7 @@ MonoBehaviour:
   - {fileID: -1061537476601098720}
   - {fileID: -3367438123469428250}
   - {fileID: 4590421453366604308}
+  - {fileID: -2123096470968183505}
 --- !u!114 &4590421453366604308
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -38,5 +38,14 @@ namespace BattleSimulator.Abilities
             // TODO: keep simulation and presentation separate so we could run the simulation as a function from command line
             // TODO: could compile the scripts and save out the simulation state and just run that without needing any of the unity assets.
         }
+
+        public bool CanPerform (Unit unit, Unit target)
+        {
+            foreach (var component in _components)
+                if (!component.CanPerform(unit, target))
+                    return false;
+
+            return true;
+        }
     }
 }

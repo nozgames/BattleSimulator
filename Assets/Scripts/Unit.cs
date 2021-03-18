@@ -38,6 +38,8 @@ namespace BattleSimulator
 
         public int Team => _team;
 
+        public bool isDead => _health <= 0.0f;
+
         public Target Target { get; set; }
 
         public float size => _size;
@@ -67,9 +69,6 @@ namespace BattleSimulator
 
         private void Awake()
         {
-
-            //_graph = new AI.Graph();
-            //_graph.Load(System.IO.Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
         }
 
         private void OnEnable()
@@ -127,7 +126,7 @@ namespace BattleSimulator
                 aiunits[i] = new Simulation.Target();
                 aiunits[i].health = _units[i]._health;
                 aiunits[i].maxHealth = _units[i]._health;
-                aiunits[i].position = _units[i].transform.position;
+                aiunits[i].position = NumericsHelpers.ToNumerics(_units[i].transform.position);
                 aiunits[i].team = _units[i].Team;
             }
 
@@ -140,17 +139,20 @@ namespace BattleSimulator
 
                 unit.globalCooldown = Mathf.Max(unit.globalCooldown - Time.deltaTime, 0.0f);
 
+                if (!unit.gameObject.activeSelf)
+                    continue;
+
                 if (unit.globalCooldown > 0.0f)
                     continue;
 
                 var aicontext = new Context(i, aiunits);
-                var (abilityGuid, aitarget) = unit._graph.Execute(aicontext);
+                //var (abilityGuid, aitarget) = unit._graph.Execute(aicontext);
+                unit._graph.Compile();
+
+#if false
 
                 var unitDef = GameSystem.unitDatabase.GetRecord<UnitDef>(unit._graph.unitDef);
                 var ability = unitDef.GetAbility(abilityGuid);
-
-                if(ability != null)
-                    ability.ToPresentation(unit);
 
                 unit.Target = null;
                 if (aitarget != null)
@@ -168,6 +170,12 @@ namespace BattleSimulator
                 if (unit.Target == null)
                     continue;
 
+                if (ability != null && ability.CanPerform(unit, (Unit)unit.Target))
+                {
+                    ability.ToPresentation(unit);
+                    continue;
+                }
+
                 var dir = unit.avoidance;
                 var enemy = unit.Target;
                 if (enemy.DistanceTo(unit) <= ((Unit)enemy).size + unit.size)
@@ -178,6 +186,7 @@ namespace BattleSimulator
                 dir.Normalize();
 
                 unit.transform.position += dir * unit._speed * Time.deltaTime;
+#endif
 #endif
 
 #if false
@@ -197,12 +206,12 @@ namespace BattleSimulator
 #endif
             }
 
-            foreach (var unit in _units)
+            for(int i=0; i < _units.Count; )
             {
-                // TODO: figure out the active action
-
-//                foreach (var action in unit._actions)
-  //                  action.Perform(Time.deltaTime);
+                if (_units[i].isDead)
+                    Destroy(_units[i].gameObject);
+                else
+                    i++;
             }
 
             // Copy the states back into the units
@@ -273,6 +282,11 @@ namespace BattleSimulator
         public bool FilterEnemy (Unit filter)
         {
             return filter.Team != Team;
+        }
+
+        public void Damage (float amount)
+        {
+            _health = Mathf.Max(_health - amount, 0.0f);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace BattleSimulator.Simulation
     [Node(prefab = "ConstFloatNode")]
     class ConstFloatNode : FloatValueNode
     {
-        [SerializeField]
+        [NodePropertyInfo]
         public float value { get; set; }
 
         protected override float GetValue(Context context) => value;

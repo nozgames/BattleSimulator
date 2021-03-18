@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace BattleSimulator.Simulation
 {
@@ -22,7 +21,7 @@ namespace BattleSimulator.Simulation
 
     public class NodeInfo
     {
-        private static Dictionary<Type,NodeInfo> _cache = new Dictionary<Type,NodeInfo>();
+        private static Dictionary<Type, NodeInfo> _cache = new Dictionary<Type, NodeInfo>();
 
         public Type nodeType { get; private set; }
 
@@ -51,7 +50,7 @@ namespace BattleSimulator.Simulation
             return Create(node);
         }
 
-        public static NodeInfo Create (Node node)
+        public static NodeInfo Create(Node node)
         {
             var type = node.GetType();
             if (_cache.TryGetValue(type, out var nodeInfo))
@@ -60,15 +59,15 @@ namespace BattleSimulator.Simulation
             // Create a new node info
             nodeInfo = new NodeInfo();
             nodeInfo.nodeType = type;
-            nodeInfo.name = type.Name;            
+            nodeInfo.name = type.Name;
             _cache[type] = nodeInfo;
 
             var ports = new List<PortInfo>();
             var nodeProperties = new List<NodeProperty>();
-            for(; type != typeof(Node); type = type.BaseType)
+            for (; type != typeof(Node); type = type.BaseType)
             {
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-                foreach(var property in properties)
+                foreach (var property in properties)
                 {
                     if (typeof(Port).IsAssignableFrom(property.PropertyType))
                     {
@@ -76,11 +75,8 @@ namespace BattleSimulator.Simulation
                         continue;
                     }
 
-                    if (property.GetCustomAttribute<SerializeField>() == null)
-                        continue;
-
                     var nodeProperty = NodeProperty.FromPropertyInfo(property);
-                    if(null == nodeProperty)
+                    if (null == nodeProperty)
                         throw new InvalidOperationException($"serialized property of type '{property.PropertyType.Name}' is not a supported NodeProperty type");
 
                     nodeProperties.Add(nodeProperty);
@@ -113,18 +109,18 @@ namespace BattleSimulator.Simulation
             return null;
         }
 
-        public PortInfo GetPortInfo (string name)
+        public PortInfo GetPortInfo(string name)
         {
-            foreach(var portInfo in ports)
+            foreach (var portInfo in ports)
                 if (0 == string.Compare(portInfo.propertyInfo.Name, name, true))
                     return portInfo;
 
             return null;
         }
 
-        public PortInfo GetPortInfo (Port port)
+        public PortInfo GetPortInfo(Port port)
         {
-            foreach(var portInfo in ports)
+            foreach (var portInfo in ports)
                 if ((Port)portInfo.propertyInfo.GetValue(port.node) == port)
                     return portInfo;
 

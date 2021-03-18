@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 
 using BattleSimulator.Extensions;
 
@@ -128,6 +129,8 @@ namespace BattleSimulator.Simulation
 
         protected void Load (BinaryReader reader)
         {
+            BattleSimulator.Simulation.Assets.Scripts.Simulation.Test.AbilitySerializer.Test();
+
             if (!reader.ReadFourCC('B', 'B', 'G', 'R'))
                 throw new InvalidDataException("not a graph");
 
@@ -144,7 +147,7 @@ namespace BattleSimulator.Simulation
             {
                 var nodeType = Type.GetType(reader.ReadString());
                 var node = (Node)Activator.CreateInstance(nodeType);
-                node.position = new UnityEngine.Vector2(reader.ReadSingle(), reader.ReadSingle());
+                node.position = new Vector2(reader.ReadSingle(), reader.ReadSingle());
                 AddNode(node);
             }
 

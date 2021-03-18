@@ -10,13 +10,13 @@ namespace BattleSimulator.Abilities
         [Tooltip("Maximum range required to use this ability")]
         [SerializeField] private float _max = 1.0f;
 
-        public virtual bool Filter(Unit unit, Unit target)
+        public override bool CanPerform(Unit unit, Unit target)
         {
             if (target == null)
                 return false;
-
-            var distanceSqr = unit.DistanceToSqr(target);
-            return distanceSqr >= _min * _min && distanceSqr <= _max * _max;
+            
+            var distance = Mathf.Max(0,unit.DistanceTo(target) - unit.size - target.size);
+            return distance >= _min && distance <= _max;
         }
     }
 }

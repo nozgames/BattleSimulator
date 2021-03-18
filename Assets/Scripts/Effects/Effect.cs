@@ -18,5 +18,11 @@ namespace BattleSimulator.Effects
         /// <param name="type"></param>
         /// <returns>True if the component of the given type exists</returns>
         public bool Has(Type type) => _components.Any(c => c.GetType() == type);
+
+        public void ToClient (Unit unit)
+        {
+            foreach (var component in _components)
+                component.ToClient(unit);
+        }
     }
 }

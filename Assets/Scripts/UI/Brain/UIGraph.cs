@@ -82,9 +82,9 @@ namespace BattleSimulator
                 {
                     var ability = uigraph._unitDef.GetAbility(abilityNode.guid);
                     if(ability != null)
-                        uigraph.CreateNode(ability, node.position);
+                        uigraph.CreateNode(ability, NumericsHelpers.FromNumerics(node.position));
                 } else
-                    uigraph.CreateNode(NodeInfo.Create(node), node.position);
+                    uigraph.CreateNode(NodeInfo.Create(node), NumericsHelpers.FromNumerics(node.position));
             }
 
             for(int nodeIndex=0; nodeIndex < graph.nodes.Count; nodeIndex++)
@@ -572,7 +572,7 @@ namespace BattleSimulator
             {
                 var uinode = _nodes[nodeIndex];
                 var node = graph.nodes[nodeIndex];
-                node.position = uinode.position;
+                node.position = NumericsHelpers.ToNumerics(uinode.position);
 
                 var uiNodeProperties = uinode.GetComponents<UINodeProperty>();
                 foreach (var uiNodeProperty in uiNodeProperties)

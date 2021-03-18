@@ -44,5 +44,10 @@ namespace BattleSimulator.Abilities
         public virtual void ToClient (Unit unit)
         {
         }
+
+        public virtual bool CanPerform (Unit unit, Unit target)
+        {
+            return true;
+        }
     }
 }

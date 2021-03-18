@@ -75,3 +75,7 @@ crashlytics-build.properties
 
 .rift
 *.blend1
+
+Server/**/bin
+Server/**/obj
+Server/.vscode

@@ -1,0 +1,9 @@
+﻿<Ability name="test">
+  <Components>
+    <ApplyEffect>
+      <Effects>
+        <Effect path="test"/>
+      </Effects>
+    </ApplyEffect>
+  </Components>
+</Ability>

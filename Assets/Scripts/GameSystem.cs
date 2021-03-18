@@ -14,13 +14,15 @@ namespace BattleSimulator
         [SerializeField] private GameObject _units = null;
         [SerializeField] private ScriptableObjectDatabase _unitDatabase = null;
 
+        public Material[] teamMaterials;
+
         private void Awake()
         {
             _instance = this;
 
             try
             {
-                _graph = UIManager.LoadGraph(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
+                _graph = UIManager.LoadGraph(Path.Combine(Application.dataPath, "Resources", "AI", "Graphs", "test.aigraph"));
             } 
             catch 
             {
@@ -33,7 +35,7 @@ namespace BattleSimulator
 
         private void OnApplicationQuit()
         {
-            _graph.ToGraph().Save(Path.Combine(Application.dataPath, "AI", "Graphs", "test.aigraph"));
+            _graph.ToGraph().Save(Path.Combine(Application.dataPath, "Resources", "AI", "Graphs", "test.aigraph"));
         }
 
         private UIGraph _graph;

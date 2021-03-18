@@ -11,9 +11,7 @@ namespace BattleSimulator.Simulation
         /// <summary>
         /// Ability guid that this node represents.
         /// </summary>
-
-        [HideInInspector]
-        [SerializeField]
+        [NodePropertyInfo(Flags = NodePropertyFlags.Hidden)]
         public Guid guid { get; set; }
 
         public string name { get; private set; }

@@ -1,14 +1,12 @@
-﻿
+﻿using System;
+using System.Numerics;
 using System.Collections.Generic;
-using Unity.Collections;
-using UnityEngine;
 
 namespace BattleSimulator.Simulation
 {
     public class Context
     {
         // TODO: list of abilities for the unit
-        
 
         public List<int> _unitStack = new List<int>();
 
@@ -17,7 +15,7 @@ namespace BattleSimulator.Simulation
         // TODO: this should be the second on the stack
         public Target unit => units[unitIndex];
 
-        public int unitIndex => _unitStack[Mathf.Max(_unitStack.Count - 2, 0)];
+        public int unitIndex => _unitStack[Math.Max(_unitStack.Count - 2, 0)];
 
         public int targetIndex => _unitStack[_unitStack.Count - 1];
 

@@ -13,8 +13,24 @@ namespace BattleSimulator.Effects
         }
     }
 
+    public struct Modifier
+    {
+        public float amount;
+        public float multiplier;
+    }
+
     public class EffectComponent : ScriptableObject
     {
         [HideInInspector] [SerializeField] private bool _active = true;
+
+        public virtual void ToClient (Unit unit)
+        {
+
+        }
+
+        public virtual Modifier GetDamageModifier ()
+        {
+            return new Modifier { amount = 0, multiplier = 1.0f };
+        }
     }
 }
